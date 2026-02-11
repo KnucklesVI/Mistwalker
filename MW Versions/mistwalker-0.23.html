@@ -1,0 +1,673 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mistwalker</title>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { font-size: 15px; }
+body {
+  font-family: Georgia, 'Times New Roman', serif;
+  background: #0d0d14;
+  color: #d4cfc6;
+  min-height: 100vh;
+  line-height: 1.55;
+}
+:root {
+  --bg-deep: #0d0d14;
+  --bg-panel: #151520;
+  --bg-card: #1c1c2b;
+  --bg-card-hover: #24243a;
+  --bg-input: #12121e;
+  --border: #2a2a3d;
+  --text-primary: #d4cfc6;
+  --text-secondary: #8a8678;
+  --text-muted: #5a5750;
+  --accent: #c9a96e;
+  --accent-dim: #8a7444;
+  --danger: #a83232;
+  --danger-light: #c94444;
+  --success: #3a7a3a;
+  --success-light: #4a9a4a;
+  --info: #3a5a8a;
+  --info-light: #4a7aba;
+  --warning: #8a6a2a;
+  --warning-light: #ba8a3a;
+  --expedition: #6a4a8a;
+  --expedition-light: #8a6aaa;
+}
+#app {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: auto 1fr;
+  height: 100vh;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+.header {
+  grid-column: 1 / 3;
+  background: var(--bg-panel);
+  border-bottom: 1px solid var(--border);
+  padding: 10px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+.header-title { font-size: 1.15rem; color: var(--accent); letter-spacing: 1px; white-space: nowrap; }
+.header-day { font-size: 0.9rem; color: var(--text-secondary); }
+.header-stats { display: flex; gap: 16px; font-size: 0.8rem; flex-wrap: wrap; }
+.stat { display: flex; align-items: center; gap: 4px; }
+.stat-label { color: var(--text-muted); }
+.stat-value { color: var(--text-primary); font-weight: bold; }
+.stat-value.danger { color: var(--danger-light); }
+.stat-value.warning { color: var(--warning-light); }
+.stat-value.good { color: var(--success-light); }
+.btn-advance {
+  background: var(--accent-dim); color: var(--bg-deep); border: none;
+  padding: 8px 28px; font-family: Georgia, serif; font-size: 0.85rem;
+  cursor: pointer; letter-spacing: 1px; transition: all 0.2s; white-space: nowrap;
+}
+.btn-advance:hover { background: var(--accent); }
+.feed-panel { border-right: 1px solid var(--border); display: flex; flex-direction: column; overflow: hidden; }
+.feed-header { padding: 10px 16px; font-size: 0.75rem; letter-spacing: 1.5px; text-transform: uppercase; color: var(--text-muted); border-bottom: 1px solid var(--border); background: var(--bg-panel); }
+.feed-scroll { flex: 1; overflow-y: auto; padding: 12px 16px; padding-bottom: 20px; }
+.right-panel { display: flex; flex-direction: column; overflow: hidden; }
+.tabs { display: flex; background: var(--bg-panel); border-bottom: 1px solid var(--border); padding: 0; flex-wrap: wrap; }
+.tab { padding: 8px 14px; cursor: pointer; color: var(--text-muted); border: none; border-bottom: 2px solid transparent; transition: all 0.2s; font-family: Georgia, serif; font-size: 0.8rem; background: none; }
+.tab:hover { color: var(--text-secondary); }
+.tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+.tab.has-action { position: relative; }
+.tab.has-action::after { content: ''; position: absolute; top: 6px; right: 4px; width: 6px; height: 6px; border-radius: 50%; background: var(--accent); animation: tab-pulse 2s ease-in-out infinite; }
+@keyframes tab-pulse { 0%, 100% { opacity: 0.4; } 50% { opacity: 1; } }
+.tab-content { flex: 1; overflow-y: auto; padding: 16px; }
+.view { display: none; }
+.view.active { display: block; }
+.day-header { color: var(--text-muted); font-size: 0.75rem; letter-spacing: 2px; text-transform: uppercase; margin: 18px 0 8px; padding-bottom: 4px; border-bottom: 1px solid var(--border); }
+.day-header:first-child { margin-top: 0; }
+.message { background: var(--bg-card); border: 1px solid var(--border); padding: 10px 14px; margin-bottom: 6px; border-left: 3px solid var(--border); font-size: 0.88rem; }
+.message.cat-alert { border-left-color: var(--danger-light); }
+.message.cat-expedition { border-left-color: var(--expedition-light); }
+.message.cat-perimeter { border-left-color: var(--info-light); }
+.message.cat-system { border-left-color: var(--success-light); }
+.message.cat-research { border-left-color: var(--warning-light); }
+.message.cat-event { border-left-color: var(--accent); }
+.message.cat-training { border-left-color: #6aaa8a; }
+.message.cat-combat { border-left-color: #aa4444; }
+.message.cat-dig { border-left-color: #7a6a5a; }
+.msg-category { font-size: 0.65rem; letter-spacing: 1.5px; text-transform: uppercase; margin-bottom: 4px; font-family: monospace; }
+.cat-alert .msg-category { color: var(--danger-light); }
+.cat-expedition .msg-category { color: var(--expedition-light); }
+.cat-perimeter .msg-category { color: var(--info-light); }
+.cat-system .msg-category { color: var(--success-light); }
+.cat-research .msg-category { color: var(--warning-light); }
+.cat-event .msg-category { color: var(--accent); }
+.cat-training .msg-category { color: #6aaa8a; }
+.cat-combat .msg-category { color: #aa4444; }
+.cat-dig .msg-category { color: #7a6a5a; }
+.msg-text { font-size: 0.88rem; line-height: 1.5; }
+.message.clickable { cursor: pointer; transition: background 0.15s, border-color 0.15s; }
+.message.clickable:hover { background: var(--bg-card-hover); border-color: var(--accent-dim); }
+.msg-goto { float: right; opacity: 0.3; font-size: 1.1rem; margin-left: 8px; }
+.message.clickable:hover .msg-goto { opacity: 0.7; }
+.msg-actions { margin-top: 8px; display: flex; gap: 6px; flex-wrap: wrap; }
+.btn { background: var(--bg-input); border: 1px solid var(--border); color: var(--text-primary); padding: 5px 12px; font-family: Georgia, serif; font-size: 0.8rem; cursor: pointer; transition: all 0.15s; }
+.btn:hover { background: var(--bg-card-hover); border-color: var(--accent-dim); color: var(--accent); }
+.btn-primary { background: var(--accent-dim); color: var(--bg-deep); border-color: var(--accent-dim); }
+.btn-primary:hover { background: var(--accent); border-color: var(--accent); }
+.btn:disabled { opacity: 0.4; cursor: not-allowed; }
+.dashboard-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 16px; }
+.dash-card { background: var(--bg-card); border: 1px solid var(--border); padding: 12px; }
+.dash-card h3 { font-size: 0.7rem; letter-spacing: 1.5px; text-transform: uppercase; color: var(--text-muted); margin-bottom: 6px; }
+.dash-value { font-size: 1.5rem; color: var(--accent); margin-bottom: 2px; position: relative; cursor: default; }
+.dash-value[data-tip]:hover::after { content: attr(data-tip); position: absolute; left: 0; top: 100%; background: var(--bg-card); border: 1px solid var(--border); color: var(--text-secondary); font-size: 0.75rem; padding: 6px 10px; white-space: pre; z-index: 100; pointer-events: none; line-height: 1.6; min-width: 160px; }
+.dash-detail { font-size: 0.8rem; color: var(--text-secondary); }
+.section-title { font-size: 0.7rem; letter-spacing: 1.5px; text-transform: uppercase; color: var(--text-muted); margin: 16px 0 8px; padding-bottom: 4px; border-bottom: 1px solid var(--border); }
+.section-title:first-child { margin-top: 0; }
+.item-row { display: flex; justify-content: space-between; align-items: center; padding: 8px 12px; background: var(--bg-card); border: 1px solid var(--border); margin-bottom: 4px; font-size: 0.85rem; }
+.item-row:hover { background: var(--bg-card-hover); }
+.item-row.clickable { cursor: pointer; }
+.item-name { color: var(--text-primary); }
+.item-detail { color: var(--text-secondary); font-size: 0.8rem; }
+.status-good { color: var(--success-light); }
+.status-warn { color: var(--warning-light); }
+.status-bad { color: var(--danger-light); }
+.status-info { color: var(--info-light); }
+.status-expedition { color: var(--expedition-light); }
+.role-group { margin-bottom: 16px; }
+.role-header { font-size: 0.7rem; letter-spacing: 1.5px; text-transform: uppercase; color: var(--text-muted); margin-bottom: 6px; padding-bottom: 4px; border-bottom: 1px solid var(--border); }
+.modal-overlay { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.7); z-index: 200; justify-content: center; align-items: center; }
+.modal-overlay.open { display: flex; }
+.modal { background: var(--bg-panel); border: 1px solid var(--border); max-width: 520px; width: 90%; max-height: 80vh; overflow-y: auto; padding: 20px; }
+.modal h2 { font-size: 1rem; color: var(--accent); margin-bottom: 12px; }
+.modal p { font-size: 0.85rem; margin-bottom: 10px; color: var(--text-secondary); }
+.modal-actions { margin-top: 14px; display: flex; gap: 8px; flex-wrap: wrap; }
+.trait-bar { display: flex; align-items: center; gap: 6px; margin-bottom: 4px; font-size: 0.8rem; }
+.trait-label { width: 80px; color: var(--text-secondary); }
+.trait-dots { display: flex; gap: 3px; }
+.trait-dot { width: 9px; height: 9px; border-radius: 50%; background: var(--border); }
+.trait-dot.filled { background: var(--accent); }
+.trait-hint { font-size: 0.65rem; color: var(--text-muted); font-style: italic; }
+.select-group { margin-bottom: 10px; }
+.select-group label { display: block; font-size: 0.75rem; letter-spacing: 1px; text-transform: uppercase; color: var(--text-muted); margin-bottom: 4px; }
+.select-group select { width: 100%; padding: 6px; background: var(--bg-input); border: 1px solid var(--border); color: var(--text-primary); font-family: Georgia, serif; font-size: 0.85rem; }
+.reassign-section { margin-top: 12px; padding-top: 10px; border-top: 1px solid var(--border); }
+.reassign-section h3 { font-size: 0.7rem; letter-spacing: 1px; text-transform: uppercase; color: var(--text-muted); margin-bottom: 8px; }
+.empty-state { text-align: center; color: var(--text-muted); padding: 30px; font-style: italic; font-size: 0.85rem; }
+.location-card { background: var(--bg-card); border: 1px solid var(--border); padding: 10px 12px; margin-bottom: 6px; }
+.location-card.locked { opacity: 0.5; }
+.location-card.explored { border-left: 3px solid var(--success-light); }
+.location-card.available { border-left: 3px solid var(--accent); }
+.tip { position: relative; cursor: help; border-bottom: 1px dotted var(--text-muted); }
+.tip:hover::after { content: attr(data-tip); position: absolute; bottom: 120%; left: 50%; transform: translateX(-50%); background: var(--bg-panel); border: 1px solid var(--border); color: var(--text-primary); padding: 4px 8px; font-size: 0.75rem; white-space: nowrap; z-index: 100; pointer-events: none; }
+.intro-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: var(--bg-deep); z-index: 300; display: flex; justify-content: center; align-items: center; transition: opacity 1s; }
+.intro-overlay.fading { opacity: 0; pointer-events: none; }
+.intro-content { max-width: 500px; padding: 40px; text-align: center; }
+.intro-content h1 { font-size: 1.8rem; color: var(--accent); margin-bottom: 20px; letter-spacing: 3px; }
+.intro-content p { font-size: 0.95rem; line-height: 1.8; color: var(--text-secondary); margin-bottom: 12px; }
+.gameover-overlay { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.85); z-index: 300; justify-content: center; align-items: center; }
+.gameover-overlay.open { display: flex; }
+.gameover-content { max-width: 450px; padding: 40px; text-align: center; }
+.gameover-content h1 { font-size: 1.5rem; color: var(--danger-light); margin-bottom: 12px; }
+.gameover-content p { color: var(--text-secondary); margin-bottom: 10px; }
+</style>
+</head>
+<body>
+<div class="intro-overlay" id="intro">
+  <div class="intro-content">
+    <h1>MISTWALKER</h1>
+    <p>The mist came. Your monastery survived. Protected by prayer, surrounded by farms, ringed by priests who hold back the fog.</p>
+    <p>Sustain the monastery. Explore the mist. Discover what lies beyond.</p>
+    <button class="btn btn-primary" onclick="startGame()" style="margin-top:20px; padding:10px 36px; font-size:0.95rem;">Begin</button>
+  </div>
+</div>
+<div class="gameover-overlay" id="gameover">
+  <div class="gameover-content">
+    <h1>The Light Has Gone Out</h1>
+    <p id="gameover-reason"></p>
+    <p id="gameover-stats"></p>
+    <button class="btn" onclick="location.reload()" style="margin-top:16px;">Try Again</button>
+  </div>
+</div>
+<div class="modal-overlay" id="modal" onclick="if(event.target===this)closeModal()">
+  <div class="modal" id="modal-content"></div>
+</div>
+<div id="app">
+  <div class="header">
+    <div style="display:flex;align-items:center;gap:16px;">
+      <div class="header-title">MISTWALKER</div>
+      <div class="header-day" id="header-day">Day 1</div>
+    </div>
+    <div class="header-stats" id="header-stats"></div>
+    <button class="btn-advance" onclick="advanceDay()">ADVANCE DAY</button>
+  </div>
+  <div class="feed-panel">
+    <div class="feed-header">Feed</div>
+    <div class="feed-scroll" id="feed-scroll"></div>
+  </div>
+  <div class="right-panel">
+    <div class="tabs">
+      <button class="tab active" data-tab="dashboard" onclick="switchTab('dashboard')">Dashboard</button>
+      <button class="tab" data-tab="people" onclick="switchTab('people')">People</button>
+      <button class="tab" data-tab="expeditions" onclick="switchTab('expeditions')">Explore</button>
+      <button class="tab" data-tab="research" onclick="switchTab('research')">Research</button>
+      <button class="tab" data-tab="engineering" onclick="switchTab('engineering')">Engineering</button>
+    </div>
+    <div class="tab-content">
+      <div class="view active" id="view-dashboard"></div>
+      <div class="view" id="view-people"></div>
+      <div class="view" id="view-expeditions"></div>
+      <div class="view" id="view-research"></div>
+      <div class="view" id="view-engineering"></div>
+    </div>
+  </div>
+</div>
+<script>
+const VERSION='Alpha 0.23';
+const NAMES={
+locations:['The Sunken Chapel','Ashenveil Crossing','The Bone Orchard','Greymarch Bridge','Hollowspire','The Wailing Reach','Duskfield Ruins','Thornwall Keep','Misthollow Basin','The Pale Gate','Cindervault','Blackmere Depths','The Shattered Nave','Ironmoor Station','Rotstone Abbey','Gloomfen','The Veiled Stairs','Copperhead Ravine','Whispering Cairns','Old Mill Crossing','The Drowned Altar','Ashen Arbor','Frostbind Pass','The Hungering Dark','Lichen Crypt','Blight Hollow','Starfall Terrace','The Warden Ring','Salt Flat Sanctum','Mirewatch Tower','The Severed Path','Ghostmist Landing','Dreadfall Cleft','The Gilt Tomb','Ravenmoor','Blightwell','The Iron Parish','Coldvein Mine','Fogmantle Ridge','The Broken Loom','Embervault','Hushwood','The Obsidian Table','Rothelm Barracks','Gallowsreach','The Lost Reliquary','Mistfang Gorge','Penitent Hill','The Stoneblood Gate','Veilwatch Outpost'],
+artifacts:['Thornmantle','The Pale Lantern','Ironvow Shield','Mist-Eater Blade','The Shepherd\'s Bell','Cinderfang Dagger','Wraithcoil Bracers','The Last Candle','Ashen Ward','Rootbind Staff','Starfall Pendant','Oathkept','The Grim Tether','Blightbane Edge','Frostmarrow Gauntlet','The Silent Horn','Duskweaver Cloak','Bonechill Mace','The Verdant Seal','Hollowstone Ring','Vigil Torch','The Unbroken Chain','Mistwalker\'s Compass','Rattling Helm','The Pilgrim\'s Burden','Ashmark Tome','Gloomward Shield','The Scarlet Vow','Copperblood Amulet','Dreadnought Plate','Whisperstone','The Iron Requiem','Ghostlight Rod','Banefire Torch','The Ossuary Key','Saltmark Gloves','Mourning Star','Voidthorn Spear','The Warden\'s Eye','Penitent Blade','Blightroot Vial','The Cairn Crown','Dawnreach Bow','Fellward Helm','The Mist King\'s Tooth','Rothelm Buckler','Silentwatch Pendant','The Ember Codex','Greymarrow Shield','Veilstone Hammer'],
+creatures:['Hollow Stalker','Ashmouth','Veilwraith','Mistfang','The Pale Ones','Blighthound','Thornback','Rotweaver','Fog Lurker','Husk Shambler','Cinderspawn','The Eyeless','Marrow Leech','Gloom Crawler','Bonepick','Shriek Bat','Mireborn','Duskwolf','The Hungering','Ash Widow','Petrified Shambler','Flickergeist','Rootmaw','Carrion Shade','The Withered','Mist Serpent','Scorch Drake','Veilspider','Rattlebone','Grey Ghoul','Embertick','Sporespawn','The Wailing','Nightcrawler','Blight Worm','Frostmaw','Huskling','Deadwood Strider','Rot Wasp','Weeping One','Fog Stalker','Ash Bear','Cryptwyrm','Shadeweaver','Thorn Horror','Cinder Wolf','Mist Drake','The Faceless','Bonewalker','Gloom Hulk'],
+discoveries:['Glyph of Warding','The Shepherd\'s Codex','Rootweave Technique','Seal of the First Light','Dustbound Manuscript','Prayer of Stillness','The Cartographer\'s Notes','Blight Anatomy','Mist Current Maps','Forging of Ashsteel','The Penitent\'s Formula','Deep Root Cultivation','Watcher\'s Sigil Patterns','Creature Migration Paths','Ancient Irrigation Plans','The Binding Words','Alchemy of Endurance','Siege Fortification Guide','Mistflow Tide Tables','Apothecary\'s Grimoire','The Foundry Blueprints','Litany of Clarity','Echo Chamber Acoustics','Rune Language Primer','Harvest Moon Calendar','The Warden\'s Doctrine','Pale Fire Distillation','Cartography of the Deep','Resonance Tuning','Preservation Techniques','Old Kingdom Engineering','The Broken Chronicle','Cipher of the Ancients','Spirit Conduit Design','Field Surgery Manual','Deep Mineral Survey','The Mist Reader\'s Art','Structural Reinforcement','Battle Formation Codex','The Grower\'s Almanac','Luminite Extraction','Ward Network Theory','Beast Behavior Patterns','The Builder\'s Testament','Tunnel Bracing Methods','The Choir of Shields','Fog Density Analysis','Rationing Optimization','Ancestral Planting Rites','The Vigil Protocol'],
+buildables:['Watchtower','Granary Extension','Reliquary Vault','Deep Well','Armory','Irrigation Channels','Beacon Spire','Reinforced Wall','Herbalist Garden','Signal Pyre','Stone Barricade','Root Cellar','Training Ground','Archival Chamber','Windbreak Wall','Compost Works','Prayer Sanctum','Forge','Lookout Platform','Water Cistern','Drying Racks','Guard Post','Greenhouse','Oil Press','Tannery','Stonemason Yard','Chandlery','Smokehouse','Infirmary','Ward Anchor','Mill House','Brewhouse','Charcoal Kiln','Mending Hall','Signal Flags','Fletcher Workshop','Pottery Kiln','Loom House','Candle Works','Apothecary','Seed Vault','Carpenter Shop','Bath House','Root Press','Creamery','Ice House','Rendering Pit','Vestment Hall','Bell Tower','Meditation Cell'],
+digLevels:['The Shallow Cellars','The Forgotten Crypts','The Sunken Archive','The Deep Foundry'],
+survivors:['Soren','Elara','Matthias','Wren','Isadora','Beric','Calla','Aldous','Thessa','Rowan','Mira','Godric','Yara','Leander','Faye','Corwin','Elsa','Draven','Ingrid','Willem','Brienne','Ashton','Delia','Gareth','Hazel','Kael','Lisbeth','Milo','Nerissa','Oswin','Priya','Quillan','Rhea','Stellan','Tanith','Ulric','Vera','Wystan','Xara','Yorick','Zara','Anselm','Britta','Caspian','Dagny','Emeric','Fiora','Gunnar','Hestia','Ivo']
+};
+
+const FLAVOR={
+locDesc:[
+['Barely visible through the mist. Broken walls catch what little light remains.','Close enough to hear sounds on quiet nights. Something shifts in the fog.','The outline is familiar — a place like the monastery, but long abandoned.','Pale stone shows through the grey. Whatever happened here happened quickly.','The mist thins here occasionally, revealing dark windows and collapsed roofing.','Wind carries a faint smell from this direction. Old wood. Old stone. Old death.'],
+['A dark shape at the edge of perception. The mist seems thicker there.','Faint lights have been reported. Whether firelight or something else, none can say.','The priests sense something from that direction. Cold and patient.','Occasionally the wind carries sounds — grinding stone, or perhaps just the earth settling.','A landmark the old maps agree on, though they disagree on everything else.','Mist walkers report the fog behaves strangely near this place. It pulls.'],
+['Beyond the easy reach of prayer. Whatever waits there has waited a long time.','Only the most experienced walkers have glimpsed it. They came back quiet.','Deep in the mist. The air grows strange near it — charged, almost electric.','The old chronicles mention this place. They advise against going. They do not say why.','So far that even the mist seems different there. Thicker. Older. Hungry.','At the very edge of what the walkers can reach. A place of last resorts.']
+],
+depart:[
+'{name} steps beyond the perimeter. The mist closes behind like a curtain.',
+'{name} adjusts pack and gear, nods to the gate priests. The grey swallows the rest.',
+'The gate opens. {name} walks into the fog without looking back.',
+'A brief prayer from the perimeter priests, then {name} is gone.',
+'{name} takes one last breath of clean air and steps through.',
+'The mist parts reluctantly for {name}. It will be less courteous on the way back.'
+],
+midway:[
+'No sign of {name}. The mist offers no answers.',
+'A brief flash of light in the distance. Perhaps {name}\'s signal. Perhaps not.',
+'{name} is still out there. The perimeter priests say they can still sense the connection.',
+'Nothing from {name}\'s direction. Silence is usually good news.',
+'Day {day} without word. The monastery carries on.',
+'Some claim they heard footsteps beyond the perimeter last night. Probably not {name}.'
+],
+returnPeace:[
+'{name} emerged from the mist, tired but whole. "Quiet out there," was all the report.',
+'{name} returned with pack heavy and spirits intact. The mist was merciful today.',
+'The gate priests spotted {name} approaching at dusk. No wounds. No pursuit.',
+'{name} came back with dust on every surface and a look of grim satisfaction.',
+'A shape in the fog — then {name}, alive and laden with findings.'
+],
+returnWin:[
+'{name}\'s team held their ground. Steel and faith proved enough.',
+'The {creature} came fast. {name} was ready.',
+'{name} reports the {creature} scattered after the first real blow.',
+'The {creature} tested {name}\'s resolve and found it unyielding.'
+],
+returnNarrow:[
+'{name} limped back with the team. "We won, but barely."',
+'Victory against the {creature}, but the cost was written on their faces.',
+'The {creature} fought hard. {name}\'s team fought harder — just.',
+'{name}\'s expedition survived the {creature}, though not without scars.'
+],
+returnLoss:[
+'{name} came back at a run, team in tow. "Too many. We had to fall back."',
+'The {creature} overwhelmed them. {name} made the call to retreat.',
+'They tried. The {creature} were simply too numerous.',
+'{name} emerged from the mist supporting a wounded companion.'
+],
+discExp:[
+'Among the ruins: {disc}. Fragile, but intact enough to study.',
+'Half-buried in debris: {disc}. The scholars will want to see this.',
+'{name} found something remarkable — {disc}.',
+'Wrapped in oilcloth, as if someone meant to protect it: {disc}.',
+'In a sealed chamber untouched by mist: {disc}. Ancient, and invaluable.'
+],
+discDig:[
+'The engineers broke through to a sealed space. Within: {disc}.',
+'Picks struck hollow stone. Beyond it, carefully preserved: {disc}.',
+'Dust and centuries of silence, then: {disc}. As if it had been waiting.',
+'Deep beneath the foundations: {disc}. The builders knew this was here.'
+],
+artFound:[
+'Something glints in the rubble — {art}. It hums faintly when touched.',
+'Wrapped in rotting cloth: {art}. The craftsmanship is beyond anything here.',
+'{art}, buried among the bones of its last owner. Still potent.',
+'Hidden behind a false wall: {art}. Someone hid this deliberately.'
+],
+defWin:[
+'The {creature} lunged. The line held without flinching.',
+'A textbook defense. The {creature} never breached the formation.',
+'Blades met claws and the result was simple: the monastery stood firm.',
+'The {creature} broke against the defenders like fog against stone.'
+],
+defNarrow:[
+'The {creature} found a gap in the line. Blood was spilled before it was sealed.',
+'A desperate few minutes. The defenders held, but the cost was real.',
+'Touch and go. The {creature} nearly broke through before being driven back.',
+'The line bent but did not break. Someone paid the price for that.'
+],
+defLoss:[
+'The {creature} came in waves. The line buckled, then broke.',
+'Too many, too fast. The defenders fought for every step and lost most of it.',
+'A breach. The {creature} poured through before anyone could react.',
+'The defense crumbled under sheer numbers.'
+],
+threatSeen:[
+'Movement in the mist. {creature} — {count} of them, from the {dir}.',
+'The watchers report shapes in the fog. {creature}, {count} strong, from the {dir}.',
+'A scout barely made it back. {creature}, at least {count}, from the {dir}.',
+'The mist ripples with purpose. Something approaches from the {dir}. {creature}. {count} of them.'
+],
+idle:[
+'{name} was found praying alone in the chapel before dawn.',
+'{name} and {name2} shared a flask of something by the fire. Neither spoke much.',
+'{name} spent the evening sharpening blades. The rhythm carried through the halls.',
+'{name} worked extra hours. "Keeps the mind off things."',
+'{name} stood at the perimeter for a long time, watching the mist.',
+'A few gathered to hear {name} tell stories of before the mist.',
+'Someone left wildflowers on the memorial stones. {name} was seen nearby.',
+'{name} repaired a section of wall that didn\'t strictly need repairing.',
+'{name} couldn\'t sleep and spent the night cataloguing supplies.',
+'{name} taught {name2} a card game from before. Laughter echoed briefly.',
+'An argument between {name} and {name2} over watch duties ended in grudging agreement.',
+'{name} carved a small figure from scrap wood. It sits on the windowsill now.',
+'The smell of cooking — {name} found herbs in the garden and made something almost pleasant.',
+'{name} was caught talking to the monastery cat. "Best listener here," was the defense.'
+],
+research:[
+'After days of careful study, the meaning becomes clear.',
+'Pages of notes, sleepless nights. But the knowledge was worth it.',
+'The text was old, the language archaic. But the secrets within are real.',
+'What seemed like gibberish at first reveals its patterns.',
+'The scholars emerged exhausted but certain. They have something.'
+],
+digCleared:[
+'The last stones gave way. A new space opens beneath the monastery.',
+'Air rushes up from below — stale, ancient, but breathable. They\'re through.',
+'Lantern light spills into a chamber no one has entered in centuries.',
+'The engineers emerge covered in dust, grinning. "You should see what\'s down there."'
+]
+};
+function flavorText(pool,vars){let t=pick(pool);if(vars)for(let[k,v]of Object.entries(vars))t=t.split('{'+k+'}').join(v);return t}
+
+const CONFIG={foodPerPerson:1,startingFood:120,trainingDays:{priest:14,fighter:7,mistwalker:21,scholar:10,engineer:8,farmer:3},baseStats:{fighter:{attack:2,defense:2},priest:{bubbleSize:2,endurance:0},scholar:{researchSpeed:1.0,insight:1},engineer:{buildSpeed:1.0,digSpeed:1.0},mistwalker:{attack:2,defense:2,mistEndurance:0},farmer:{yield:3}},defenseValue:{fighter:1.0,mistwalker:1.0,farmer:0.5,priest:0.3,scholar:0.2,engineer:0.2,unassigned:0.25,training:0},baseAttentionPerDay:0.5,expeditionAttention:5,threatThreshold:20,threatSpawnInterval:8,maxOverlappingThreats:2,survivorCheckFrequency:10,survivorChanceBase:50,survivorChanceAfterDeath:65,scoutingDays:1,recallSpeedMultiplier:2,mistRings:[{id:'shallows',label:'The Shallows',minRange:1,encounterChance:10,injuryMin:2,injuryMax:3,rewards:[{type:'location',w:35},{type:'discovery',w:25},{type:'food',w:15},{type:'nothing',w:15},{type:'survivor',w:10}]},{id:'greyreach',label:'The Grey Reach',minRange:4,encounterChance:20,injuryMin:4,injuryMax:5,rewards:[{type:'location',w:30},{type:'discovery',w:25},{type:'survivor',w:15},{type:'weakness',w:15},{type:'nothing',w:15}]},{id:'deep',label:'The Deep',minRange:7,encounterChance:30,injuryMin:6,injuryMax:8,rewards:[{type:'discovery',w:25},{type:'location',w:20},{type:'survivor',w:20},{type:'weakness',w:15},{type:'artifact',w:10},{type:'nothing',w:10}]}]};
+
+const STARTING_PEOPLE=[
+{id:1,name:'Sister Agatha',role:'priest',assignment:'perimeter',traits:{spirit:3,body:2,mind:2},exp:6,status:'active',completedTraining:['priest']},
+{id:2,name:'Brother Ivan',role:'priest',assignment:'perimeter',traits:{spirit:2,body:2,mind:2},exp:4,status:'active',completedTraining:['priest']},
+{id:3,name:'Sister Maren',role:'priest',assignment:'perimeter',traits:{spirit:3,body:1,mind:2},exp:3,status:'active',completedTraining:['priest']},
+{id:4,name:'Brother Aldric',role:'priest',assignment:'perimeter',traits:{spirit:2,body:2,mind:1},exp:1,status:'active',completedTraining:['priest']},
+{id:5,name:'Brother Marcus',role:'mistwalker',assignment:'available',traits:{spirit:3,body:3,mind:2},exp:5,status:'active',completedTraining:['priest','fighter','mistwalker']},
+{id:6,name:'Petra',role:'scholar',assignment:'available',traits:{spirit:1,body:1,mind:3},exp:4,status:'active',completedTraining:['scholar']},
+{id:7,name:'Thomas',role:'fighter',assignment:'garrison',traits:{spirit:1,body:3,mind:1},exp:3,status:'active',completedTraining:['fighter']},
+{id:8,name:'Cassius',role:'fighter',assignment:'garrison',traits:{spirit:1,body:3,mind:2},exp:4,status:'active',completedTraining:['fighter']},
+{id:9,name:'Elena',role:'fighter',assignment:'garrison',traits:{spirit:2,body:2,mind:2},exp:2,status:'active',completedTraining:['fighter']},
+{id:10,name:'Hilde',role:'farmer',assignment:'farms',traits:{spirit:1,body:2,mind:2},exp:5,status:'active',completedTraining:['farmer']},
+{id:11,name:'Oren',role:'farmer',assignment:'farms',traits:{spirit:1,body:2,mind:3},exp:3,status:'active',completedTraining:['farmer']},
+{id:12,name:'Bram',role:'farmer',assignment:'farms',traits:{spirit:1,body:3,mind:1},exp:4,status:'active',completedTraining:['farmer']},
+{id:13,name:'Lily',role:'farmer',assignment:'farms',traits:{spirit:2,body:1,mind:2},exp:2,status:'active',completedTraining:['farmer']},
+{id:14,name:'Jonas',role:'farmer',assignment:'farms',traits:{spirit:1,body:2,mind:1},exp:3,status:'active',completedTraining:['farmer']},
+{id:15,name:'Ruth',role:'farmer',assignment:'farms',traits:{spirit:1,body:2,mind:2},exp:2,status:'active',completedTraining:['farmer']},
+{id:16,name:'Maria',role:'unassigned',assignment:'none',traits:{spirit:3,body:1,mind:2},exp:0,status:'active',completedTraining:[]},
+{id:17,name:'Cedric',role:'unassigned',assignment:'none',traits:{spirit:1,body:3,mind:1},exp:0,status:'active',completedTraining:[]},
+{id:18,name:'Nadia',role:'engineer',assignment:'available',traits:{spirit:2,body:2,mind:3},exp:3,status:'active',completedTraining:['engineer']},
+{id:19,name:'Felix',role:'unassigned',assignment:'none',traits:{spirit:1,body:2,mind:2},exp:0,status:'active',completedTraining:[]},
+{id:20,name:'Greta',role:'unassigned',assignment:'none',traits:{spirit:2,body:1,mind:2},exp:0,status:'active',completedTraining:[]},
+];
+
+let state={};
+function initState(){state={day:1,food:CONFIG.startingFood,attention:0,maxDistanceTraveled:0,people:JSON.parse(JSON.stringify(STARTING_PEOPLE)),messages:[],expeditions:[],mistExplorations:[],threats:[],training:[],activeResearch:[],activeBuild:null,activeDig:null,builtSystems:[],equippedArtifacts:{},locations:[],discoveries:[],artifacts:[],creatures:[],buildables:[],digLevels:[],exploredLocations:[],foundDiscoveries:[],studiedDiscoveries:[],foundArtifacts:[],knownWeaknesses:[],flags:{},nextId:21,gameOver:false};generateContent();}
+
+function alive(){return state.people.filter(p=>p.status!=='dead')}
+function combat_ready(){return alive().filter(p=>p.status!=='injured'&&p.status!=='training'&&p.status!=='expedition'&&p.status!=='lost'&&p.status!=='rescuing')}
+function byRole(r){return alive().filter(p=>p.role===r)}
+function getPerson(id){return state.people.find(p=>p.id===id)}
+function rand(n){return Math.floor(Math.random()*n)}
+function pick(arr){return arr[rand(arr.length)]}
+function chance(pct){return Math.random()*100<pct}
+function pluralize(name,count){if(count<=1)return name;if(name.startsWith('The '))return name;return name+'s'}
+function addMessage(cat,text,actions,clickAction){state.messages.push({day:state.day,category:cat,text:text,actions:actions||[],clickAction:clickAction||null,id:Date.now()+Math.random()})}
+function mc(type,id){return{type:type,id:id}}
+function handleFeedClick(idx){let msgs=[...state.messages].reverse();let m=msgs[idx];if(!m||!m.clickAction)return;let ca=m.clickAction;if(ca.type==='person'){let p=getPerson(ca.id);if(p)showPersonModal(ca.id)}else if(ca.type==='tab'){switchTab(ca.id)}else if(ca.type==='threat'){switchTab('dashboard')}}
+function roleLabel(r){return{priest:'Priest',fighter:'Fighter',farmer:'Farmer',mistwalker:'Mistwalker',scholar:'Scholar',engineer:'Engineer',unassigned:'Unassigned',training:'Training'}[r]||r}
+function personTag(p){let l=p.exp>=5?'vet':p.exp>=3?'exp':p.exp>=1?'trn':'nov';return p.name+' ['+roleLabel(p.role)+', '+l+']'}
+
+function getPersonStats(p){
+  let b=JSON.parse(JSON.stringify(CONFIG.baseStats[p.role]||{}));
+  let eb=Math.floor(p.exp/3);
+  if(p.role==='fighter'){b.attack=(b.attack||0)+eb;b.defense=(b.defense||0)+Math.floor(eb/2)}
+  if(p.role==='priest'){b.endurance=p.traits.spirit+Math.floor(p.exp/5)}
+  if(p.role==='scholar'){b.researchSpeed=(b.researchSpeed||0)+eb*0.15}
+  if(p.role==='mistwalker'){b.attack=(b.attack||0)+eb;b.defense=(b.defense||0)+Math.floor(eb/2);b.mistEndurance=p.traits.spirit+Math.floor(p.exp/5)}
+  if(p.role==='engineer'){b.buildSpeed=(b.buildSpeed||0)+eb*0.15;b.digSpeed=(b.digSpeed||0)+eb*0.15}
+  if(p.role==='farmer'){b.yield=(b.yield||0)+Math.floor(eb/2)}
+  if(b.attack!==undefined)b.attack+=Math.max(0,p.traits.body-1);
+  if(b.defense!==undefined)b.defense+=Math.max(0,p.traits.body-1);
+  if(b.researchSpeed!==undefined)b.researchSpeed+=(p.traits.mind-1)*0.2;
+  if(b.buildSpeed!==undefined)b.buildSpeed+=(p.traits.mind-1)*0.2;
+  if(b.digSpeed!==undefined)b.digSpeed+=(p.traits.mind-1)*0.2;
+  if(b.yield!==undefined)b.yield+=Math.max(0,p.traits.body-1);
+  if(b.bubbleSize!==undefined)b.bubbleSize+=Math.max(0,p.traits.spirit-1);
+  let eq=state.equippedArtifacts[p.id]||[];
+  for(let aId of eq){let art=state.artifacts.find(a=>a.id===aId);if(art)for(let[k,v]of Object.entries(art.effects))if(b[k]!==undefined)b[k]+=v;}
+  for(let k in b)if(typeof b[k]==='number')b[k]=Math.round(b[k]*100)/100;
+  return b;
+}
+
+// PROCEDURAL GENERATION
+function pickNames(pool,count){let a=[...pool];for(let i=a.length-1;i>0;i--){let j=rand(i+1);[a[i],a[j]]=[a[j],a[i]]}return a.slice(0,count)}
+function generateContent(){generateLocations();generateCreatures();generateDiscoveries();generateArtifacts();generateBuildables();generateDigLevels();linkContent()}
+
+function generateLocations(){
+  state.locations=[];let count=8+rand(3);let names=pickNames(NAMES.locations,count);
+  for(let i=0;i<count;i++){let tier=Math.floor((i/count)*5)+1;let dist=Math.max(1,Math.min(5,tier+rand(2)-1));
+  let descTier=dist<=2?0:dist<=3?1:2;state.locations.push({id:'loc-'+i,label:names[i],distance:dist,risk:15+i*7+rand(10),desc:pick(FLAVOR.locDesc[descTier]),yields:[],artifactId:null,prereq:null,explored:false,revealed:i<2,scouted:false});}
+}
+function generateCreatures(){
+  state.creatures=[];let count=5+rand(2);let names=pickNames(NAMES.creatures,count);
+  for(let i=0;i<count;i++){let tier=Math.floor((i/count)*3)+1;
+  state.creatures.push({id:'crt-'+i,label:names[i],attack:2+tier+rand(2),defense:1+tier+rand(2),packMin:2+Math.floor(tier/2),packMax:3+tier,weaknessDiscovery:null,weaknessBonus:2+rand(2),lootArtifact:null,locationIds:[]});}
+}
+function generateDiscoveries(){
+  state.discoveries=[];let count=15+rand(6);let names=pickNames(NAMES.discoveries,count);
+  for(let i=0;i<count;i++){let tier=Math.floor((i/count)*3);let st=[3+rand(3),5+rand(4),8+rand(5)][tier];
+  state.discoveries.push({id:'disc-'+i,label:names[i],studyTime:st,type:'buff',unlocksId:null,unlockLabel:'',sourceType:null,sourceId:null,found:false,studied:false});}
+}
+function generateArtifacts(){
+  state.artifacts=[];let count=10+rand(4);let roles=['fighter','priest','scholar','engineer','mistwalker','farmer'];let names=pickNames(NAMES.artifacts,count);
+  for(let i=0;i<count;i++){let role=roles[i%roles.length];let fx={};
+  switch(role){case'fighter':fx={attack:1+rand(2),defense:rand(2)};break;case'priest':fx={bubbleSize:1,endurance:1+rand(2)};break;case'scholar':fx={researchSpeed:0.25+rand(3)*0.1};break;case'engineer':fx={buildSpeed:0.25+rand(3)*0.1,digSpeed:0.15+rand(3)*0.1};break;case'mistwalker':fx={mistEndurance:1+rand(2),attack:rand(2)};break;case'farmer':fx={yield:1+rand(2)};break;}
+  for(let k in fx)if(fx[k]===0)delete fx[k];
+  state.artifacts.push({id:'art-'+i,label:names[i],forRole:role,effects:fx,found:false,equippedTo:null});}
+}
+function generateBuildables(){
+  state.buildables=[];let names=pickNames(NAMES.buildables,7);
+  let tpl=[{effect:'defense',label:'+1 global defense',mag:1},{effect:'food',label:'+1 farmer yield',mag:1},{effect:'perimeter',label:'+1 priest endurance',mag:1},{effect:'research',label:'+0.25 research speed',mag:0.25},{effect:'defense',label:'+2 global defense',mag:2},{effect:'food',label:'+2 farmer yield',mag:2},{effect:'range',label:'+2 mist endurance',mag:2}];
+  for(let i=0;i<tpl.length;i++){let t=tpl[i];state.buildables.push({id:'bld-'+i,label:names[i],buildTime:3+i+rand(3),reqDiscovery:null,effect:t.effect,effectLabel:t.label,magnitude:t.mag,built:false});}
+}
+function generateDigLevels(){
+  state.digLevels=[];
+  for(let d=1;d<=4;d++)state.digLevels.push({id:'dig-'+d,label:d<=NAMES.digLevels.length?NAMES.digLevels[d-1]:'Depth '+d,depth:d,laborDays:8+d*6+rand(4),scholarsNeeded:Math.min(d,3),yields:[],cleared:false});
+}
+function addDigLevel(){let d=state.digLevels.length+1;let discIdx=state.discoveries.length;let names=pickNames(NAMES.discoveries.filter(n=>!state.discoveries.some(x=>x.label===n)),1);let tier=Math.min(2,Math.floor(d/3));let st=[6+rand(4),9+rand(5),12+rand(6)][tier];let disc={id:'disc-'+discIdx,label:names[0]||'Deep Discovery #'+d,studyTime:st,type:'buff',unlocksId:null,unlockLabel:'',sourceType:'dig',sourceId:'dig-'+d,found:false,studied:false};let buffTypes=[{label:'+1 fighter attack',id:'buff-fighter-attack'},{label:'+1 priest endurance',id:'buff-priest-end'},{label:'+1 mist endurance',id:'buff-mw-end'},{label:'+1 farmer yield',id:'buff-farmer-yield'},{label:'+1 global defense',id:'buff-defense'}];if(chance(30)&&state.buildables.length<20){let bNames=pickNames(NAMES.buildables.filter(n=>!state.buildables.some(x=>x.label===n)),1);let effects=[{effect:'defense',label:'+1 global defense',mag:1},{effect:'food',label:'+1 farmer yield',mag:1},{effect:'range',label:'+1 mist endurance',mag:1},{effect:'perimeter',label:'+1 priest endurance',mag:1}];let eff=pick(effects);let bld={id:'bld-'+state.buildables.length,label:bNames[0]||'Deep Structure #'+d,buildTime:4+d+rand(3),reqDiscovery:disc.id,effect:eff.effect,effectLabel:eff.label,magnitude:eff.mag,built:false};state.buildables.push(bld);disc.type='buildable';disc.unlocksId=bld.id;disc.unlockLabel=bld.label+' ('+bld.effectLabel+')'}else{let bt=buffTypes[d%buffTypes.length];disc.type='buff';disc.unlocksId=bt.id;disc.unlockLabel=bt.label}state.discoveries.push(disc);let lv={id:'dig-'+d,label:d<=NAMES.digLevels.length?NAMES.digLevels[d-1]:'Depth '+d,depth:d,laborDays:8+d*6+rand(4),scholarsNeeded:Math.min(d,3),yields:[disc.id],cleared:false};state.digLevels.push(lv)}
+
+function linkContent(){
+  let disc=state.discoveries,locs=state.locations,arts=state.artifacts,blds=state.buildables,crts=state.creatures,digs=state.digLevels;
+  function shuffle(a){for(let i=a.length-1;i>0;i--){let j=rand(i+1);[a[i],a[j]]=[a[j],a[i]]}return a}
+  let di=0;
+  for(let b of blds){if(di<disc.length){disc[di].type='buildable';disc[di].unlocksId=b.id;disc[di].unlockLabel=b.label+' ('+b.effectLabel+')';b.reqDiscovery=disc[di].id;di++;}}
+  for(let i=2;i<locs.length;i++){if(di<disc.length){disc[di].type='location';disc[di].unlocksId=locs[i].id;disc[di].unlockLabel='Reveals '+locs[i].label;locs[i].prereq=disc[di].id;locs[i].revealed=false;di++;}}
+  for(let c of crts){if(di<disc.length){disc[di].type='weakness';disc[di].unlocksId=c.id;disc[di].unlockLabel=c.label+' weakness (-'+c.weaknessBonus+' def)';c.weaknessDiscovery=disc[di].id;di++;}}
+  let buffTypes=[{label:'+1 fighter attack',id:'buff-fighter-attack'},{label:'+1 priest endurance',id:'buff-priest-end'},{label:'+1 mist endurance',id:'buff-mw-end'},{label:'+1 farmer yield',id:'buff-farmer-yield'}];
+  while(di<disc.length){let bt=buffTypes[di%buffTypes.length];disc[di].type='buff';disc[di].unlocksId=bt.id;disc[di].unlockLabel=bt.label;di++;}
+  shuffle(disc);let locDC=Math.ceil(disc.length*0.65);
+  for(let i=0;i<locDC;i++){let li=i%locs.length;disc[i].sourceType='location';disc[i].sourceId=locs[li].id;locs[li].yields.push(disc[i].id);}
+  let digI=0;for(let i=locDC;i<disc.length;i++){if(digI<digs.length){disc[i].sourceType='dig';disc[i].sourceId=digs[digI].id;digs[digI].yields=[disc[i].id];digI++}else{let li=i%locs.length;disc[i].sourceType='location';disc[i].sourceId=locs[li].id;locs[li].yields.push(disc[i].id)}}
+  shuffle(arts);for(let i=0;i<arts.length;i++){if(i<arts.length*0.7){locs[i%locs.length].artifactId=arts[i].id}else{crts[i%crts.length].lootArtifact=arts[i].id}}
+  for(let c of crts){let n=1+rand(2);for(let j=0;j<n;j++){let l=locs[rand(locs.length)];if(!c.locationIds.includes(l.id))c.locationIds.push(l.id)}}
+  disc.sort((a,b)=>parseInt(a.id.split('-')[1])-parseInt(b.id.split('-')[1]));
+  // Guarantee first dig level yields detection upgrade
+  if(digs.length>0&&digs[0].yields.length>0){let fd=disc.find(d=>d.id===digs[0].yields[0]);
+  // If first dig yield is buildable, swap with a non-buildable location discovery
+  if(fd&&fd.type==='buildable'){let swap=disc.find(d=>d.sourceType==='location'&&d.type!=='buildable');if(swap){let oldSrc=swap.sourceId;swap.sourceType='dig';swap.sourceId=digs[0].id;fd.sourceType='location';fd.sourceId=oldSrc;let srcLoc=locs.find(l=>l.id===oldSrc);if(srcLoc){srcLoc.yields=srcLoc.yields.filter(y=>y!==swap.id);srcLoc.yields.push(fd.id)}digs[0].yields=[swap.id];fd=swap}}
+  if(fd){fd.type='detection';fd.unlocksId='detection-base';fd.unlockLabel='Threat detection +1 day warning';fd.label='Watcher\'s Sigil Patterns';fd.studyTime=3}}
+}
+
+// CORE MECHANICS
+function getFoodProduction(){let w=alive().filter(p=>p.assignment==='farms');let t=0;let yb=getGlobalBuff('food');for(let p of w){if(p.role==='farmer'){let s=getPersonStats(p);t+=(s.yield||3)+yb}else{t+=2}}return Math.round(t*10)/10}
+function getFoodConsumption(){return alive().filter(p=>p.status!=='lost').length*CONFIG.foodPerPerson}
+function getPerimeterPriests(){return alive().filter(p=>p.assignment==='perimeter').length}
+function getPerimeterStability(){let total=0;let priests=alive().filter(p=>p.assignment==='perimeter');for(let p of priests){let s=getPersonStats(p);total+=15+(s.endurance||0)*2}total+=getGlobalBuff('perimeter')*10;return Math.min(100,Math.round(total))}
+function getPerimeterBreakdown(){let priests=alive().filter(p=>p.assignment==='perimeter');let detail=[];for(let p of priests){let s=getPersonStats(p);let contrib=15+(s.endurance||0)*2;detail.push({name:p.name,contrib:contrib})}let buff=getGlobalBuff('perimeter')*10;if(buff>0)detail.push({name:'Global Buffs',contrib:buff});return detail}
+function getDefenseStrength(){let r=getDefenseBreakdown();return r.total}
+function getDefenseBreakdown(){let garr=alive().filter(p=>(p.assignment==='garrison'||p.assignment==='available')&&p.status!=='expedition');let fromGarr=0;let detail=[];for(let p of garr){let s=getPersonStats(p);let d=s.defense||0;if(d>0){fromGarr+=d;detail.push({name:p.name,role:p.role,defense:d})}}let fromBuffs=getGlobalBuff('defense');if(fromBuffs>0)detail.push({name:'Global Buffs',role:'buff',defense:fromBuffs});let rawTotal=Math.round((fromGarr+fromBuffs)*10)/10;let perimPct=getPerimeterStability();let gap=100-perimPct;let perimScale=perimPct/100;let total=Math.round(rawTotal*perimScale*10)/10;return{total:total,rawTotal:rawTotal,fromGarr:Math.round(fromGarr*10)/10,fromBuffs:fromBuffs,perimPct:perimPct,gap:gap,detail:detail}}
+function getTeamAttack(ids){let t=0;for(let id of ids){let p=getPerson(id);if(!p||p.status==='dead')continue;let s=getPersonStats(p);t+=(s.attack||0)}t+=getGlobalBuff('defense');return t}
+function getTeamDefense(ids){let t=0;for(let id of ids){let p=getPerson(id);if(!p||p.status==='dead')continue;let s=getPersonStats(p);t+=(s.defense||0)}return t}
+function getMistWalkerRange(pid){let p=getPerson(pid);if(!p)return 0;let s=getPersonStats(p);return(s.mistEndurance||0)+getGlobalBuff('range')}
+function getDetectionRange(){let base=3;let digBonus=state.digLevels.filter(l=>l.cleared).length;return base+digBonus}
+function getGlobalBuff(type){let t=0;for(let bId of state.builtSystems){let b=state.buildables.find(x=>x.id===bId);if(b&&b.effect===type)t+=b.magnitude}for(let dId of state.studiedDiscoveries){let d=state.discoveries.find(x=>x.id===dId);if(d&&d.type==='buff'){if(type==='defense'&&d.unlocksId==='buff-fighter-attack')t+=1;if(type==='perimeter'&&d.unlocksId==='buff-priest-end')t+=1;if(type==='range'&&d.unlocksId==='buff-mw-end')t+=1;if(type==='food'&&d.unlocksId==='buff-farmer-yield')t+=1}}return t}
+
+// INJURY & CASUALTY SYSTEM
+function injure(p,days,cause){p.status='injured';p.assignment='resting';p.injuryDays=days;addMessage('combat',p.name+' ('+roleLabel(p.role)+') injured: '+cause+'. Recovery: '+days+'d.',[],mc('person',p.id))}
+function killPerson(p,cause){p.status='dead';p.assignment='none';p.deathDay=state.day;addMessage('alert',p.name+' ('+roleLabel(p.role)+') killed'+( cause?': '+cause:'')+'.',[],mc('person',p.id))}
+function pickCasualty(pool){
+  // Priority: fighters/garrison first, then farmers, then others. Higher defense = more frontline
+  let pri=pool.map(p=>{let w=0;if(p.assignment==='garrison')w+=10;if(p.role==='fighter'||p.role==='mistwalker')w+=5;if(p.assignment==='farms')w+=3;if(p.role==='farmer')w+=2;if(p.role==='priest'&&p.assignment==='perimeter')w+=1;return{p:p,w:w}});
+  pri.sort((a,b)=>b.w-a.w);
+  // Weighted random favoring frontline: top half gets 3x weight
+  let half=Math.max(1,Math.ceil(pri.length/2));
+  let weighted=[];for(let i=0;i<pri.length;i++){let mult=i<half?3:1;for(let j=0;j<mult;j++)weighted.push(pri[i].p)}
+  return pick(weighted);
+}
+function processInjuries(){for(let p of alive()){if(p.status==='injured'){p.injuryDays--;if(p.injuryDays<=0){p.status='active';p.assignment=getDefaultAssignment(p.role);addMessage('event',p.name+' ('+roleLabel(p.role)+') recovered from injuries.',[],mc('person',p.id))}}}}
+
+// DAY ADVANCEMENT
+function advanceDay(){if(state.gameOver)return;state.day++;state.attention+=CONFIG.baseAttentionPerDay;processInjuries();processScouting();processRescue();processFood();processPerimeter();processTraining();processExpeditions();processMistExplorations();processResearch();processBuild();processDig();processThreats();generateEvents();if(!state.gameOver)render()}
+
+function processFood(){let p=getFoodProduction(),c=getFoodConsumption();state.food+=p-c;state.food=Math.round(state.food*10)/10;if(state.food<=0){state.food=0;addMessage('alert','Granary empty. Starvation.',[],mc('tab','dashboard'));let cands=alive().filter(p=>p.role!=='priest');if(cands.length>0){let v=pick(cands);v.status='dead';v.assignment='none';addMessage('alert',personTag(v)+' died of starvation.',[],mc('person',v.id))}if(alive().length<=3)endGame('Starvation.')}else if(state.food<20&&state.day%3===0)addMessage('alert','Food critical: '+Math.round(state.food),[],mc('tab','dashboard'))}
+
+function processPerimeter(){if(getPerimeterPriests()===0)endGame('No priests. Mist pours in.');let ps=getPerimeterStability();if(ps>=100)return;let gap=100-ps;let riskPct=gap*0.10;let foodLost=0;for(let i=0;i<Math.floor(state.food);i++){if(chance(riskPct))foodLost++}if(foodLost>0){state.food=Math.max(0,state.food-foodLost);addMessage('perimeter','Mist crept through the perimeter. '+foodLost+' food spoiled.',[],mc('tab','dashboard'))}let exposed=alive().filter(p=>p.status==='active'&&(p.assignment==='perimeter'||p.assignment==='farms'||p.assignment==='garrison'));for(let p of exposed){if(chance(riskPct)){let roll=rand(3);if(roll===0){p.status='lost';p.assignment='lost';p.lostDay=state.day;addMessage('alert',p.name+' ('+roleLabel(p.role)+') wandered into the mist. A Mistwalker must find them.',[],mc('person',p.id))}else if(roll===1){let days=5+rand(6);p.status='injured';p.assignment='resting';p.injuryDays=days;addMessage('perimeter',p.name+' ('+roleLabel(p.role)+') touched by the mist \u2014 madness. Recovery: '+days+'d.',[],mc('person',p.id))}else{let cr=pick(state.creatures);if(cr){let pDef=(getPersonStats(p).defense||0);if(pDef>=cr.attack){injure(p,3+rand(4),'attacked by '+cr.label+' in the mist')}else{killPerson(p,'killed by '+cr.label+' in the mist')}}else{injure(p,3+rand(4),'attacked by something in the mist')}}}}let lost=state.people.filter(p=>p.status==='lost');for(let p of lost){if(state.day-p.lostDay>=10){killPerson(p,'lost to the mist \u2014 never found')}}}
+
+function rescueLost(mwId,lostId){let mw=getPerson(mwId);let lp=getPerson(lostId);if(!mw||!lp)return;if(mw.status!=='active'||mw.assignment!=='available'){addMessage('event',mw.name+' is not available to rescue.',[],mc('person',mw.id));render();return}mw.assignment='rescuing';mw.status='rescuing';mw.rescueTarget=lostId;mw.rescueEndDay=state.day+1;addMessage('expedition',mw.name+' ventures into the mist to find '+lp.name+'. Returns in 1d.',[],mc('person',lp.id));closeModal();render()}
+function processRescue(){let rescuers=alive().filter(p=>p.status==='rescuing');for(let mw of rescuers){if(state.day>=mw.rescueEndDay){let lp=getPerson(mw.rescueTarget);mw.status='active';mw.assignment='available';mw.exp=Math.min(10,mw.exp+1);delete mw.rescueTarget;delete mw.rescueEndDay;if(lp&&lp.status==='lost'){let days=3+rand(3);lp.status='injured';lp.assignment='resting';lp.injuryDays=days;delete lp.lostDay;addMessage('event',mw.name+' found '+lp.name+' in the mist. '+lp.name+' recovering ('+days+'d).',[],mc('person',lp.id))}else{addMessage('event',mw.name+' returned from rescue. Target already gone.',[],mc('person',mw.id))}}}}
+function processTraining(){for(let i=state.training.length-1;i>=0;i--){let t=state.training[i];t.daysRemaining--;if(t.daysRemaining<=0){let p=getPerson(t.personId);if(p&&p.status!=='dead'){if(t.targetRole==='mistwalker'){let successChance=p.traits.body>=3?100:50;if(!chance(successChance)){let attempt=(p.mwAttempts||0)+1;p.mwAttempts=attempt;if(attempt>=2){p.mwPermFail=true;p.role=t.previousRole||'unassigned';p.assignment=getDefaultAssignment(p.role);p.status='active';addMessage('training',p.name+' failed Mistwalker training a second time. The mist will never accept them.',[],mc('person',p.id));state.training.splice(i,1);continue}else{p.role=t.previousRole||'unassigned';p.assignment=getDefaultAssignment(p.role);p.status='active';addMessage('training',p.name+' washed out of Mistwalker training. May try once more.',[],mc('person',p.id));state.training.splice(i,1);continue}}}p.role=t.targetRole;p.assignment=getDefaultAssignment(t.targetRole);p.status='active';p.exp=Math.max(p.exp,1);if(!p.completedTraining.includes(t.targetRole))p.completedTraining.push(t.targetRole);let stats=getPersonStats(p);let sStr=Object.entries(stats).map(([k,v])=>k+':'+v).join(' ');addMessage('training',p.name+' completed '+roleLabel(t.targetRole)+' training. ['+sStr+']',[],mc('person',p.id))}state.training.splice(i,1)}}}
+
+function getDefaultAssignment(r){return{priest:'perimeter',fighter:'garrison',farmer:'farms',mistwalker:'available',scholar:'available',engineer:'available'}[r]||'none'}
+
+function processExpeditions(){for(let i=state.expeditions.length-1;i>=0;i--){let e=state.expeditions[i];e.daysOut++;if(e.recalling&&state.day>=e.recallDay&&!e.returnEndDay){let recallMW=getPerson(e.recallMWId);if(recallMW)recallMW.assignment='expedition';let returnDays=Math.max(1,Math.ceil(e.daysOut/2));e.returnEndDay=state.day+returnDays;let loc=state.locations.find(l=>l.id===e.locationId);addMessage('expedition','Recall reaches '+e.leaderName+' at '+(loc?loc.label:'?')+'. Returning in ~'+returnDays+'d.',[],mc('tab','expeditions'))}if(e.returnEndDay&&state.day>=e.returnEndDay){resolveRecalledExpedition(e);state.expeditions.splice(i,1);continue}if(!e.recalling&&!e.returnEndDay){if(!e.travelEncounter&&chance(10)){let mw=getPerson(e.leaderId);let tAtk=getTeamAttack(e.team.filter(id=>{let p=getPerson(id);return p&&p.status!=='dead'}));let cr=pick(state.creatures);if(cr){let ps=1+rand(2);let eAtk=cr.attack*ps;let crPl=pluralize(cr.label,ps);if(tAtk>=eAtk){addMessage('combat',e.leaderName+'\'s expedition encountered '+ps+' '+crPl+' en route. Fought them off.',[],mc('tab','expeditions'))}else{e.travelEncounter=true;injure(mw,2+rand(3),'ambushed by '+crPl+' en route');addMessage('combat',e.leaderName+'\'s expedition ambushed by '+ps+' '+crPl+' en route. '+mw.name+' injured.',[],mc('person',mw.id))}}}if(e.daysOut===Math.floor(e.duration/2)){addMessage('expedition',flavorText(FLAVOR.midway,{name:e.leaderName,day:String(e.daysOut)}),[],mc('tab','expeditions'));if(e.priestId){let priest=getPerson(e.priestId);if(priest&&priest.status!=='dead'){let ps=getPersonStats(priest);let pEnd=ps.endurance||0;let failChance=Math.max(0,(e.duration*5)-(pEnd*10));if(rand(100)<failChance){let mw=getPerson(e.leaderId);let survivors=[e.leaderId,e.priestId];let dead=e.team.filter(id=>!survivors.includes(id));for(let id of dead){let p=getPerson(id);if(p){p.status='dead';p.deathDay=state.day;addMessage('death',p.name+' was lost when the bubble failed.',[],mc('person',p.id))}}for(let id of survivors){let p=getPerson(id);if(p){p.assignment='available';p.status='available'}}addMessage('expedition','The mist bubble falters! '+priest.name+'\'s endurance gives out. '+mw.name+' holds a desperate barrier — but it is too small.'+(dead.length>0?' '+dead.length+' escort lost to the mist.':' The team barely survives.'),[],mc('tab','expeditions'));state.expeditions.splice(i,1);continue}}}}if(e.daysOut>=e.duration){resolveExpedition(e);state.expeditions.splice(i,1)}}}}
+
+function resolveExpedition(exp){
+  let loc=state.locations.find(l=>l.id===exp.locationId);let teamAlive=exp.team.filter(id=>{let p=getPerson(id);return p&&p.status!=='dead'});
+  let crtsHere=state.creatures.filter(c=>c.locationIds.includes(loc.id));let hadCombat=false,combatWon=true;
+  let isSoloMW=teamAlive.length===1&&getPerson(teamAlive[0])&&getPerson(teamAlive[0]).role==='mistwalker';
+  loc.scouted=true;
+  if(crtsHere.length>0){let cr=pick(crtsHere);let ps=cr.packMin+rand(cr.packMax-cr.packMin+1);let eAtk=cr.attack*ps;let eDef=cr.defense*ps;let crPl=pluralize(cr.label,ps);
+  if(state.knownWeaknesses.includes(cr.id)){eDef-=cr.weaknessBonus*ps;eDef=Math.max(ps,eDef)}
+  let tAtk=getTeamAttack(teamAlive);
+  // SOLO MW ASSESSMENT: if outmatched, scout only and retreat
+  if(isSoloMW&&tAtk<eDef){let mw=getPerson(teamAlive[0]);if(chance(10)){injure(mw,2+rand(3),'caught briefly near '+loc.label)}let crStr=crtsHere.map(c=>c.label+' (~'+c.packMin+'-'+c.packMax+')').join(', ');addMessage('expedition',mw.name+' assessed '+loc.label+': '+crStr+'. Too dangerous alone — retreating with intel.',[],mc('tab','expeditions'));let yStr=loc.yields.map(dId=>{let d=state.discoveries.find(x=>x.id===dId);return d?d.label:'?'}).join(', ');if(yStr)addMessage('expedition','Scouted: '+yStr+(loc.artifactId?'. Artifact detected.':''),[],mc('tab','expeditions'));for(let id of exp.team){let p=getPerson(id);if(p&&p.status!=='dead'&&p.status!=='injured'){p.assignment=getDefaultAssignment(p.role);p.status='active';p.exp=Math.min(10,p.exp+1)}}state.attention+=CONFIG.expeditionAttention;return}
+  hadCombat=true;
+  // DECISIVE WIN: team atk >= enemy def. No casualties.
+  if(tAtk>=eDef){addMessage('combat',flavorText(FLAVOR.returnWin,{name:exp.leaderName,creature:cr.label})+' '+ps+' '+crPl+' defeated. (Atk '+tAtk+' vs Def '+eDef+').',[],mc('tab','expeditions'));if(cr.lootArtifact&&!state.foundArtifacts.includes(cr.lootArtifact)&&chance(40)){state.foundArtifacts.push(cr.lootArtifact);let a=state.artifacts.find(x=>x.id===cr.lootArtifact);if(a){a.found=true;addMessage('expedition','Loot: '+a.label,[],mc('tab','research'))}}}
+  // NARROW WIN: atk >= 60% of enemy def. Injury likely, death rare.
+  else if(tAtk>=eDef*0.6){let escortAlive=teamAlive.filter(id=>{let p=getPerson(id);return p.role!=='mistwalker'});let vic=escortAlive.length>0?pick(escortAlive):pick(teamAlive);if(vic){let vp=getPerson(vic);if(chance(15)){killPerson(vp,'killed fighting '+crPl)}else{injure(vp,3+rand(3),'wounded fighting '+crPl)}}addMessage('combat',flavorText(FLAVOR.returnNarrow,{name:exp.leaderName,creature:cr.label})+' '+ps+' '+crPl+'. (Atk '+tAtk+' vs Def '+eDef+').',[],mc('tab','expeditions'))}
+  // DEFEAT: retreat with injuries and possible deaths.
+  else{combatWon=false;let cas=Math.min(2,teamAlive.length);let expDeathOccurred=false;for(let c=0;c<cas;c++){let pool=teamAlive.filter(id=>{let p=getPerson(id);return p.status!=='dead'&&p.status!=='injured'});if(pool.length===0)break;let escPool=pool.filter(id=>{let p=getPerson(id);return p.role!=='mistwalker'});let vic=escPool.length>0?pick(escPool):pick(pool);let vp=getPerson(vic);if(c===0&&!expDeathOccurred){killPerson(vp,'killed by '+crPl);expDeathOccurred=true}else if(chance(30)){killPerson(vp,'killed by '+crPl)}else{injure(vp,4+rand(4),'badly wounded by '+crPl)}}addMessage('combat',flavorText(FLAVOR.returnLoss,{name:exp.leaderName,creature:cr.label})+' Overwhelmed by '+ps+' '+crPl+'. (Atk '+tAtk+' vs Def '+eDef+').',[],mc('tab','expeditions'))}}
+  for(let id of exp.team){let p=getPerson(id);if(p&&p.status!=='dead'&&p.status!=='injured'){p.assignment=getDefaultAssignment(p.role);p.status='active';p.exp=Math.min(10,p.exp+1)}}
+  if(!hadCombat||combatWon){loc.explored=true;if(!state.exploredLocations.includes(loc.id))state.exploredLocations.push(loc.id);
+  for(let dId of loc.yields){if(!state.foundDiscoveries.includes(dId)){state.foundDiscoveries.push(dId);let d=state.discoveries.find(x=>x.id===dId);if(d){d.found=true;addMessage('expedition',flavorText(FLAVOR.discExp,{name:exp.leaderName,disc:d.label})+' Needs '+d.studyTime+'d research. Unlocks: '+d.unlockLabel,[],mc('tab','research'))}}}
+
+  if(loc.artifactId&&!state.foundArtifacts.includes(loc.artifactId)){state.foundArtifacts.push(loc.artifactId);let a=state.artifacts.find(x=>x.id===loc.artifactId);if(a){a.found=true;let fx=Object.entries(a.effects).map(([k,v])=>k+':+'+v).join(', ');addMessage('expedition',flavorText(FLAVOR.artFound,{art:a.label})+' ('+roleLabel(a.forRole)+'): '+fx,[],mc('tab','research'))}}
+
+  addMessage('expedition',flavorText(hadCombat?FLAVOR.returnWin:FLAVOR.returnPeace,{name:exp.leaderName,creature:''})+' Returned from '+loc.label+'.',[],mc('tab','expeditions'))}else addMessage('expedition',flavorText(FLAVOR.returnLoss,{name:exp.leaderName,creature:'the threats'})+' Driven back from '+loc.label+'.',[],mc('tab','expeditions'));
+  state.attention+=CONFIG.expeditionAttention;
+}
+
+function processResearch(){for(let i=state.activeResearch.length-1;i>=0;i--){let r=state.activeResearch[i];let sch=r.scholarIds.map(id=>getPerson(id)).filter(p=>p&&p.status==='active');if(sch.length===0){state.activeResearch.splice(i,1);continue}let spd=0;for(let s of sch){let st=getPersonStats(s);spd+=st.researchSpeed||1}if(sch.length>1)spd*=0.85;r.progress+=spd;let d=state.discoveries.find(x=>x.id===r.discoveryId);if(r.progress>=d.studyTime){d.studied=true;if(!state.studiedDiscoveries.includes(d.id))state.studiedDiscoveries.push(d.id);sch.forEach(s=>{s.assignment='available';s.exp=Math.min(10,s.exp+1)});state.activeResearch.splice(i,1);addMessage('research',pick(FLAVOR.research)+' '+d.label+' complete. Result: '+d.unlockLabel,[],mc('tab','research'));if(d.type==='location'){let l=state.locations.find(x=>x.id===d.unlocksId);if(l){l.revealed=true;addMessage('event','New location: '+l.label+' (dist '+l.distance+')',[],mc('tab','expeditions'))}}if(d.type==='weakness'){if(!state.knownWeaknesses.includes(d.unlocksId))state.knownWeaknesses.push(d.unlocksId);let c=state.creatures.find(x=>x.id===d.unlocksId);if(c)addMessage('research',c.label+' weakness: -'+c.weaknessBonus+' def in combat.',[],mc('tab','research'))}if(d.type==='buildable')addMessage('research','Can now build: '+d.unlockLabel,[],mc('tab','engineering'));if(d.type==='buff')addMessage('research','Knowledge: '+d.unlockLabel,[],mc('tab','research'));if(d.type==='detection')addMessage('research','Detection extended. Threats now visible '+getDetectionRange()+' days out.',[],mc('tab','dashboard'))}}}
+
+function processBuild(){if(!state.activeBuild)return;let builders=(state.activeBuild.engineerIds||[]).map(id=>getPerson(id)).filter(p=>p&&p.status==='active');if(builders.length===0)return;let spd=0;for(let eng of builders){let s=getPersonStats(eng);spd+=(s.buildSpeed||1)}state.activeBuild.progress+=spd;if(state.activeBuild.progress>=state.activeBuild.totalDays){let b=state.buildables.find(x=>x.id===state.activeBuild.buildableId);b.built=true;state.builtSystems.push(b.id);builders.forEach(e=>{e.assignment='available';e.exp=Math.min(10,e.exp+1)});addMessage('system','Built: '+b.label+'. Effect: '+b.effectLabel,[],mc('tab','engineering'));state.activeBuild=null}}
+
+function processDig(){if(!state.activeDig)return;let diggers=alive().filter(p=>p.assignment==='digging');if(diggers.length===0)return;let level=state.digLevels[state.activeDig.levelIndex];if(!level)return;let spd=0;for(let d of diggers){let s=getPersonStats(d);spd+=(s.digSpeed||1)}state.activeDig.progress+=spd;if(state.activeDig.progress>=level.laborDays){level.cleared=true;diggers.forEach(d=>{d.assignment='available'});addMessage('dig',flavorText(FLAVOR.digCleared,{})+' '+level.label+' cleared.',[],mc('tab','engineering'));for(let dId of level.yields){if(!state.foundDiscoveries.includes(dId)){state.foundDiscoveries.push(dId);let d=state.discoveries.find(x=>x.id===dId);if(d){d.found=true;addMessage('dig',flavorText(FLAVOR.discDig,{disc:d.label})+' '+d.studyTime+'d research. Unlocks: '+d.unlockLabel,[],mc('tab','research'))}}}addDigLevel();state.activeDig=null}}
+
+function spawnThreat(cr,ps,dir){let det=getDetectionRange();let fast=chance(15);let minWarn=fast?1:Math.max(2,det-1);let maxWarn=det+1;let actualWarn=minWarn+rand(Math.max(1,maxWarn-minWarn+1));state.threats.push({id:'t-'+state.day+'-'+rand(999),creatureId:cr.id,count:ps,direction:dir,arrivalDayMin:state.day+minWarn,arrivalDayMax:state.day+maxWarn,actualArrivalDay:state.day+actualWarn,scouted:false,status:'approaching'});addMessage('alert',flavorText(FLAVOR.threatSeen,{creature:cr.label,count:String(ps),dir:dir})+' '+cr.label+' (Atk: '+cr.attack+', Def: '+cr.defense+'). ~'+ps+' spotted. Est. '+minWarn+'-'+maxWarn+'d out.',[],mc('tab','dashboard'))}
+function getThreatCreature(){let md=state.maxDistanceTraveled;let maxTier=md>=7?3:md>=4?2:1;let eligible=state.creatures.filter((c,i)=>{let tier=Math.floor((i/state.creatures.length)*3)+1;return tier<=maxTier});return pick(eligible)||state.creatures[0]}
+function getThreatPackSize(cr){let md=state.maxDistanceTraveled;let sizeBonus=Math.floor(md/3);return Math.min(cr.packMin+sizeBonus+rand(cr.packMax-cr.packMin+1),cr.packMax+3)}
+function processThreats(){let DIRS=['northern','southern','eastern','western'];if(state.attention>=CONFIG.threatThreshold&&!state.flags.firstThreat){state.flags.firstThreat=true;let cr=getThreatCreature();let ps=getThreatPackSize(cr);spawnThreat(cr,ps,pick(DIRS))}if(state.attention>=CONFIG.threatThreshold+15&&state.day%CONFIG.threatSpawnInterval===0&&state.threats.filter(t=>t.status==='approaching').length<CONFIG.maxOverlappingThreats){let cr=getThreatCreature();let ps=getThreatPackSize(cr);spawnThreat(cr,ps,pick(DIRS))}for(let t of state.threats){if(t.status==='approaching'&&state.day>=t.actualArrivalDay)resolveThreatAttack(t);if(t.status==='approaching'&&state.day===t.actualArrivalDay-1){let cr=state.creatures.find(c=>c.id===t.creatureId);addMessage('alert','ATTACK TOMORROW from '+t.direction+'! '+(cr?cr.label:'Threat')+'. Defense: '+getDefenseStrength()+'.'+(t.scouted?' Count confirmed: '+t.count+'.':' Est. ~'+t.count+'.'),[],mc('tab','dashboard'))}}state.threats=state.threats.filter(t=>t.status!=='resolved')}
+
+function resolveThreatAttack(threat){threat.status='resolved';let cr=state.creatures.find(c=>c.id===threat.creatureId);let eAtk=cr.attack*threat.count;let eDef=cr.defense*threat.count;if(state.knownWeaknesses.includes(cr.id)){eDef-=cr.weaknessBonus*threat.count;eDef=Math.max(threat.count,eDef);addMessage('combat','Weakness applied vs '+cr.label+': enemy def reduced to '+eDef,[],mc('tab','dashboard'))}let def=getDefenseStrength();
+  // DECISIVE WIN: def >= enemy atk. No casualties at all.
+  let crPl=pluralize(cr.label,threat.count);
+  if(def>=eAtk){addMessage('combat',flavorText(FLAVOR.defWin,{creature:cr.label})+' '+threat.count+' '+crPl+' repelled. (Atk '+eAtk+' vs Def '+def+'). No losses.',[],mc('tab','dashboard'));if(cr.lootArtifact&&!state.foundArtifacts.includes(cr.lootArtifact)&&chance(25)){state.foundArtifacts.push(cr.lootArtifact);let a=state.artifacts.find(x=>x.id===cr.lootArtifact);if(a){a.found=true;addMessage('event','Loot: '+a.label,[],mc('tab','research'))}}}
+  // NARROW WIN: def >= 60% of enemy atk. Injuries, small chance of death.
+  else if(def>=eAtk*0.6){let pool=combat_ready().filter(p=>p.assignment==='garrison'||p.assignment==='farms'||p.assignment==='available');if(pool.length>0){let v=pickCasualty(pool);if(chance(20)){killPerson(v,'overwhelmed by '+crPl)}else{injure(v,3+rand(4),'wounded fighting '+crPl)}}addMessage('combat',flavorText(FLAVOR.defNarrow,{creature:cr.label})+' '+threat.count+' '+crPl+' repelled. (Atk '+eAtk+' vs Def '+def+').',[],mc('tab','dashboard'))}
+  // DEFEAT: def < 60%. Multiple injuries, higher death chance, food loss.
+  else{let pool=combat_ready().filter(p=>p.assignment==='garrison'||p.assignment==='farms'||p.assignment==='available'||p.assignment==='perimeter');let cas=Math.min(2,pool.length);let deathOccurred=false;for(let c=0;c<cas;c++){if(pool.length===0)break;let v=pickCasualty(pool);pool=pool.filter(x=>x.id!==v.id);if(c===0&&!deathOccurred){killPerson(v,'killed in breach by '+crPl);deathOccurred=true}else if(chance(35)){killPerson(v,'killed in breach by '+crPl)}else{injure(v,4+rand(5),'badly wounded in breach')}}state.food=Math.max(0,state.food-10);addMessage('combat',flavorText(FLAVOR.defLoss,{creature:cr.label})+' '+threat.count+' '+crPl+' breached. (Atk '+eAtk+' vs Def '+def+'). Food damaged.',[],mc('tab','dashboard'));if(alive().length<=3)endGame('Too few remain.')}}
+
+function generateEvents(){if(state.day===3&&!state.flags.expHint){let mw=alive().find(p=>p.role==='mistwalker'&&p.assignment==='available');if(mw){state.flags.expHint=true;addMessage('event',personTag(mw)+' available for expeditions. Solo or with escort (needs priest bubble).',[],mc('tab','expeditions'))}}if(state.day===5&&!state.flags.trainHint){state.flags.trainHint=true;let ua=alive().filter(p=>p.role==='unassigned');if(ua.length>0)addMessage('event',ua.length+' unassigned. Train them in People tab.',[],mc('tab','people'))}if(state.day===8&&getPerimeterStability()<100&&!state.flags.perimHint){state.flags.perimHint=true;addMessage('perimeter','Perimeter at '+getPerimeterStability()+'%. Gaps in coverage weaken defense and expose your people to the mist.',[],mc('tab','dashboard'))}if(state.day>5&&state.day%CONFIG.survivorCheckFrequency===0){let recentDeath=state.people.some(p=>p.status==='dead'&&p.deathDay&&state.day-p.deathDay<=3);let survChance=recentDeath?CONFIG.survivorChanceAfterDeath:CONFIG.survivorChanceBase;if(chance(survChance)){let name=pick(NAMES.survivors.filter(n=>!state.people.some(p=>p.name===n)));if(name){let newId=state.nextId++;state.people.push({id:newId,name:name,role:'unassigned',assignment:'none',traits:{spirit:1+rand(3),body:1+rand(3),mind:1+rand(3)},exp:0,status:'active',completedTraining:[]});addMessage('event','Survivor from mist: '+name+'. Unassigned.',[],mc('person',newId))}}}// Character idle events
+if(state.day>2&&chance(30)){let pool=alive().filter(p=>p.status==='active');if(pool.length>=2){let p1=pick(pool);let p2=pick(pool.filter(p=>p.id!==p1.id));addMessage('event',flavorText(FLAVOR.idle,{name:p1.name,name2:p2.name}))}}
+// Quiet day atmosphere
+let dayMsgs=state.messages.filter(m=>m.day===state.day);if(dayMsgs.length===0){let flavors=['A quiet day at the monastery. The mist holds steady.','Wind stirs the prayer flags. Nothing moves beyond the perimeter.','Birdsong from somewhere in the mist. A small mercy.','The priests hum softly on the perimeter. All is calm.','Fog thickens, then thins. The day passes without incident.','Smoke rises from the kitchens. A still, unremarkable day.','The monastery breathes. For now, the mist keeps its distance.','Candles flicker in the chapel. The faithful tend their duties.','Rain patters against old stone. The world beyond remains hidden.','A clear sky, if only above the monastery. The mist swirls below.'];addMessage('event',pick(flavors))}}
+
+// PLAYER ACTIONS
+function getTraitReq(role){return{fighter:{body:2},priest:{spirit:3},scholar:{mind:3},engineer:{body:2,mind:2},farmer:{},mistwalker:{spirit:3,body:2}}[role]||{}}
+function meetsTraitReq(p,role){let req=getTraitReq(role);for(let[t,min]of Object.entries(req))if((p.traits[t]||0)<min)return false;return true}
+function traitReqLabel(role){let req=getTraitReq(role);let names={spirit:'Spirit',body:'Resilience',mind:'Acuity'};return Object.entries(req).map(([t,v])=>names[t]+' '+v+'+').join(', ')}
+function startTrainingAction(pid,targetRole){let p=getPerson(pid);if(!p||p.status!=='active')return;if(targetRole==='mistwalker'){if(!p.completedTraining.includes('fighter')||!p.completedTraining.includes('priest')){addMessage('event',p.name+' needs Fighter + Priest training first.',[],mc('person',pid));closeModal();render();return}if(p.mwPermFail){addMessage('event',p.name+' has permanently failed Mistwalker training.',[],mc('person',pid));closeModal();render();return}}if(!meetsTraitReq(p,targetRole)){addMessage('event',p.name+' cannot train as '+roleLabel(targetRole)+'. Requires: '+traitReqLabel(targetRole)+'.',[],mc('person',pid));closeModal();render();return}let days=CONFIG.trainingDays[targetRole]||7;let prev=p.role;p.role='training';p.assignment='training';p.status='training';state.training.push({personId:p.id,targetRole:targetRole,previousRole:prev,daysRemaining:days,totalDays:days});if(targetRole==='mistwalker'&&p.traits.body<3)addMessage('training',p.name+' begins Mistwalker training. Outcome uncertain — Resilience is not exceptional.',[],mc('person',pid));else addMessage('training',p.name+' begins '+roleLabel(targetRole)+' training. '+days+'d.',[],mc('person',pid));closeModal();render()}
+
+function reassignPerson(pid,asgn){let p=getPerson(pid);if(!p||p.status!=='active')return;if(asgn==='perimeter'&&p.role!=='priest'){addMessage('event','Only priests can hold perimeter.');closeModal();render();return}p.assignment=asgn;let note='';if(asgn==='farms'&&p.role!=='farmer')note=' (reduced food)';if(asgn==='garrison'){let s=getPersonStats(p);note=' (def: '+(s.defense||0)+')'}addMessage('event',personTag(p)+' \u2192 '+asgn+note,[],mc('person',pid));closeModal();render()}
+
+function equipArtifact(aId,pid){let a=state.artifacts.find(x=>x.id===aId);if(!a)return;if(a.equippedTo){let prev=state.equippedArtifacts[a.equippedTo];if(prev)state.equippedArtifacts[a.equippedTo]=prev.filter(id=>id!==aId)}a.equippedTo=pid;if(!state.equippedArtifacts[pid])state.equippedArtifacts[pid]=[];state.equippedArtifacts[pid].push(aId);addMessage('event',a.label+' equipped to '+getPerson(pid).name,[],mc('person',pid));closeModal();render()}
+function unequipArtifact(aId){let a=state.artifacts.find(x=>x.id===aId);if(!a||!a.equippedTo)return;let ownerId=a.equippedTo;let prev=state.equippedArtifacts[ownerId];if(prev)state.equippedArtifacts[ownerId]=prev.filter(id=>id!==aId);let ownerName=getPerson(ownerId)?getPerson(ownerId).name:'?';a.equippedTo=null;addMessage('event',a.label+' unequipped from '+ownerName+'.',[],mc('person',ownerId));render()}
+
+function startResearch(dId){let d=state.discoveries.find(x=>x.id===dId);if(!d||d.studied||state.activeResearch.some(r=>r.discoveryId===dId))return;let scholars=alive().filter(p=>p.role==='scholar'&&(p.assignment==='available'||p.assignment==='none'));if(scholars.length===0){addMessage('event','No scholars available.');render();return}if(scholars.length===1){confirmResearch(dId,scholars[0].id);return}showResearchModal(dId,scholars)}
+function showResearchModal(dId,scholars){let d=state.discoveries.find(x=>x.id===dId);let sH=scholars.map(s=>{let st=getPersonStats(s);let spd=st.researchSpeed||1;let est=Math.ceil(d.studyTime/spd);return'<div class="item-row clickable" onclick="confirmResearch(\''+dId+'\','+s.id+')"><div><span class="item-name">'+s.name+'</span><br><span class="item-detail">Research Speed: '+Math.round(spd*100)/100+' | Est. ~'+est+' days</span></div><button class="btn" onclick="confirmResearch(\''+dId+'\','+s.id+')">Select</button></div>'}).join('');document.getElementById('modal-content').innerHTML='<h2>Research: '+d.label+'</h2><p>Study time: ~'+d.studyTime+'d. Choose a scholar:</p>'+sH+'<div class="modal-actions"><button class="btn" onclick="closeModal()">Cancel</button></div>';document.getElementById('modal').classList.add('open')}
+function confirmResearch(dId,scholarId){let d=state.discoveries.find(x=>x.id===dId);let s=getPerson(scholarId);if(!d||!s||s.status!=='active'){addMessage('event','Scholar unavailable.');closeModal();render();return}s.assignment='researching';state.activeResearch.push({discoveryId:dId,scholarIds:[s.id],progress:0});let st=getPersonStats(s);let spd=st.researchSpeed||1;let est=Math.ceil(d.studyTime/spd);addMessage('research',personTag(s)+' researching '+d.label+'. ~'+est+'d.',[],mc('tab','research'));closeModal();render()}
+
+function addScholarToResearch(dId){let r=state.activeResearch.find(x=>x.discoveryId===dId);if(!r)return;let s=alive().find(p=>p.role==='scholar'&&(p.assignment==='available'||p.assignment==='none')&&!r.scholarIds.includes(p.id));if(!s){addMessage('event','No additional scholars.');render();return}s.assignment='researching';r.scholarIds.push(s.id);addMessage('research',s.name+' joins research.',[],mc('tab','research'));render()}
+function addEngineerToDig(){if(!state.activeDig)return;let eng=alive().find(p=>p.role==='engineer'&&(p.assignment==='available'||p.assignment==='none'));if(!eng){addMessage('event','No engineers available.');render();return}eng.assignment='digging';addMessage('dig',eng.name+' joins excavation (+30%).',[],mc('tab','engineering'));render()}
+function addEngineerToBuild(){if(!state.activeBuild)return;let eng=alive().find(p=>p.role==='engineer'&&(p.assignment==='available'||p.assignment==='none'));if(!eng){addMessage('event','No engineers available.');render();return}eng.assignment='building';state.activeBuild.engineerIds.push(eng.id);addMessage('system',eng.name+' joins construction (+30%).',[],mc('tab','engineering'));render()}
+
+function startBuild(bId){if(state.activeBuild){addMessage('event','Already building.');render();return}let b=state.buildables.find(x=>x.id===bId);if(!b||b.built)return;let d=state.discoveries.find(x=>x.id===b.reqDiscovery);if(!d||!d.studied){addMessage('event','Research required discovery first.');render();return}let eng=alive().find(p=>p.role==='engineer'&&(p.assignment==='available'||p.assignment==='none'));if(!eng){addMessage('event','Need an engineer to build.');render();return}eng.assignment='building';state.activeBuild={buildableId:bId,progress:0,totalDays:b.buildTime,engineerIds:[eng.id]};addMessage('system','Building '+b.label+'. '+b.buildTime+'d. Engineer: '+eng.name,[],mc('tab','engineering'));render()}
+
+function startDig(){if(state.activeDig){addMessage('event','Already digging.');render();return}let ni=state.digLevels.findIndex(l=>!l.cleared);if(ni===-1){addDigLevel();ni=state.digLevels.length-1}let avail=alive().filter(p=>p.role==='engineer'&&(p.assignment==='available'||p.assignment==='none'));if(avail.length===0){addMessage('event','Need an engineer to lead dig.');render();return}if(avail.length===1){confirmDig(avail[0].id,ni);return}showDigModal(ni,avail)}
+function showDigModal(ni,engineers){let lv=state.digLevels[ni];let eH=engineers.map(e=>{let s=getPersonStats(e);let spd=s.digSpeed||1;let est=Math.ceil(lv.laborDays/spd);return'<div class="item-row clickable" onclick="confirmDig('+e.id+','+ni+')"><div><span class="item-name">'+e.name+'</span><br><span class="item-detail">Dig Speed: '+Math.round(spd*100)/100+' | Est. ~'+est+' days</span></div><button class="btn" onclick="confirmDig('+e.id+','+ni+')">Select</button></div>'}).join('');document.getElementById('modal-content').innerHTML='<h2>Excavation: '+lv.label+'</h2><p>Labor required: '+lv.laborDays+' eng-days. Choose an engineer:</p>'+eH+'<div class="modal-actions"><button class="btn" onclick="closeModal()">Cancel</button></div>';document.getElementById('modal').classList.add('open')}
+function confirmDig(engineerId,levelIndex){let eng=getPerson(engineerId);if(!eng||eng.status!=='active'){addMessage('event','Engineer unavailable.');closeModal();render();return}eng.assignment='digging';state.activeDig={levelIndex:levelIndex,progress:0};let lv=state.digLevels[levelIndex];let s=getPersonStats(eng);let spd=s.digSpeed||1;let est=Math.ceil(lv.laborDays/spd);addMessage('dig','Excavation of '+lv.label+' begins. Engineer: '+eng.name+'. ~'+est+' days.',[],mc('tab','engineering'));closeModal();render()}
+
+function scoutThreat(mwId,threatId){let mw=getPerson(mwId);let t=state.threats.find(x=>x.id===threatId);if(!mw||!t)return;if(mw.status!=='active'||mw.assignment!=='available'){addMessage('event',mw.name+' is not available to scout.',[],mc('person',mw.id));closeModal();render();return}mw.assignment='scouting';mw.status='scouting';t.scoutingMWId=mwId;t.scoutingEndDay=state.day+CONFIG.scoutingDays;let cr=state.creatures.find(c=>c.id===t.creatureId);addMessage('expedition',flavorText(FLAVOR.depart,{name:mw.name})+' Scouting '+t.direction+' for '+(cr?cr.label:'threat')+'. Returns in '+CONFIG.scoutingDays+'d.',[],mc('person',mw.id));closeModal();render()}
+function showScoutModal(threatId){let t=state.threats.find(x=>x.id===threatId);if(!t)return;let cr=state.creatures.find(c=>c.id===t.creatureId);let mws=alive().filter(p=>p.role==='mistwalker'&&p.status==='active'&&p.assignment==='available');let mwH=mws.map(m=>'<div class="item-row clickable" onclick="scoutThreat('+m.id+',\''+t.id+'\')"><div><span class="item-name">'+m.name+'</span><br><span class="item-detail">Scout takes '+CONFIG.scoutingDays+'d — reveals exact count and arrival</span></div><button class="btn" onclick="scoutThreat('+m.id+',\''+t.id+'\')">Scout</button></div>').join('');document.getElementById('modal-content').innerHTML='<h2>Scout Threat</h2><p>'+(cr?cr.label:'Unknown')+' from the '+t.direction+' (est. '+(t.arrivalDayMin-state.day)+'-'+(t.arrivalDayMax-state.day)+'d)</p><p>Choose a Mistwalker:</p>'+mwH+'<div class="modal-actions"><button class="btn" onclick="closeModal()">Cancel</button></div>';document.getElementById('modal').classList.add('open')}
+function processScouting(){for(let t of state.threats){if(!t.scoutingMWId)continue;let mw=getPerson(t.scoutingMWId);if(!mw)continue;if(state.day>=t.scoutingEndDay){t.scouted=true;mw.status='active';mw.assignment='available';let cr=state.creatures.find(c=>c.id===t.creatureId);let daysUntil=t.actualArrivalDay-state.day;let scoutAtk=cr?cr.attack*t.count:0;let scoutDef=cr?cr.defense*t.count:0;let wk=cr&&state.knownWeaknesses.includes(cr.id);if(wk){scoutDef=Math.max(t.count,scoutDef-cr.weaknessBonus*t.count)}addMessage('expedition',mw.name+' returns with intelligence: '+t.count+' '+(cr?cr.label:'threat')+' confirmed. Total Atk: '+scoutAtk+', Def: '+scoutDef+(wk?' (weakness applied)':'')+'. Arrives in '+daysUntil+'d (day '+t.actualArrivalDay+'). Your defense: '+getDefenseStrength()+'.',[],mc('tab','dashboard'));delete t.scoutingMWId;delete t.scoutingEndDay}}}
+function assignToDigging(pid){let p=getPerson(pid);if(!p||p.status!=='active')return;if(!state.activeDig){addMessage('event','No active dig.');closeModal();render();return}p.assignment='digging';addMessage('event',personTag(p)+' assigned to dig.',[],mc('person',pid));closeModal();render()}
+function assignToBuilding(pid){let p=getPerson(pid);if(!p||p.status!=='active')return;if(!state.activeBuild){addMessage('event','No active build.');closeModal();render();return}p.assignment='building';if(!state.activeBuild.engineerIds)state.activeBuild.engineerIds=[];state.activeBuild.engineerIds.push(p.id);addMessage('event',personTag(p)+' assigned to build.',[],mc('person',pid));closeModal();render()}
+
+function recallExpedition(expIndex,recallMWId){let exp=state.expeditions[expIndex];let mw=getPerson(recallMWId);if(!exp||!mw)return;if(mw.status!=='active'||mw.assignment!=='available'){addMessage('event',mw.name+' is not available.',[],mc('person',mw.id));closeModal();render();return}let remainingDays=exp.duration-exp.daysOut;let recallTravel=Math.max(1,Math.ceil(remainingDays/CONFIG.recallSpeedMultiplier));exp.recalling=true;exp.recallDay=state.day+recallTravel;exp.recallMWId=recallMWId;mw.assignment='recalling';mw.status='expedition';let leader=getPerson(exp.leaderId);addMessage('expedition',flavorText(FLAVOR.depart,{name:mw.name})+' Dispatched to recall '+(leader?leader.name:'expedition')+'. Will reach them in ~'+recallTravel+'d.',[],mc('tab','expeditions'));closeModal();render()}
+function showRecallModal(expIndex){let exp=state.expeditions[expIndex];if(!exp)return;let loc=state.locations.find(l=>l.id===exp.locationId);let remainingDays=exp.duration-exp.daysOut;let mws=alive().filter(p=>p.role==='mistwalker'&&p.status==='active'&&p.assignment==='available');let mwH=mws.map(m=>{let travel=Math.max(1,Math.ceil(remainingDays/CONFIG.recallSpeedMultiplier));return'<div class="item-row clickable" onclick="recallExpedition('+expIndex+','+m.id+')"><div><span class="item-name">'+m.name+'</span><br><span class="item-detail">Travels at 2x speed. ~'+travel+'d to reach, then return journey.</span></div><button class="btn" onclick="recallExpedition('+expIndex+','+m.id+')">Dispatch</button></div>'}).join('');document.getElementById('modal-content').innerHTML='<h2>Recall Expedition</h2><p>Expedition to '+(loc?loc.label:'?')+' (day '+exp.daysOut+'/'+exp.duration+'). Team returns empty-handed.</p><p>Choose a Mistwalker to dispatch:</p>'+mwH+'<div class="modal-actions"><button class="btn" onclick="closeModal()">Cancel</button></div>';document.getElementById('modal').classList.add('open')}
+function resolveRecalledExpedition(exp){for(let id of exp.team){let p=getPerson(id);if(p&&p.status!=='dead'){p.status='active';p.assignment=getDefaultAssignment(p.role)}}let mw=getPerson(exp.recallMWId);if(mw&&mw.status==='expedition'){mw.status='active';mw.assignment='available'}let loc=state.locations.find(l=>l.id===exp.locationId);addMessage('expedition','Expedition recalled from '+(loc?loc.label:'?')+'. No discoveries — the team returns safely.',[],mc('tab','expeditions'))}
+// MIST EXPLORATION
+function rollRingReward(ring){let total=ring.rewards.reduce((s,r)=>s+r.w,0);let roll=rand(total);let cum=0;for(let r of ring.rewards){cum+=r.w;if(roll<cum)return r.type}return'nothing'}
+function getRingForDay(depth,dayNum){let rings=CONFIG.mistRings;if(depth==='shallows')return rings[0];if(depth==='greyreach')return dayNum<=3?rings[0]:rings[1];if(depth==='deep')return dayNum<=3?rings[0]:dayNum<=6?rings[1]:rings[2];return rings[0]}
+function getMistCreatureForRing(ring){let third=Math.max(1,Math.ceil(state.creatures.length/3));let idx;if(ring.id==='shallows')idx=rand(third);else if(ring.id==='greyreach')idx=third+rand(Math.max(1,third));else idx=Math.min(state.creatures.length-1,2*third+rand(Math.max(1,state.creatures.length-2*third)));return state.creatures[Math.min(idx,state.creatures.length-1)]}
+function applyMistReward(type,ring){if(type==='location'){let opts=state.locations.filter(l=>!l.revealed);if(opts.length===0)return applyMistReward('discovery',ring);let loc=pick(opts);loc.revealed=true;return{type:'location',label:loc.label,distance:loc.distance}}if(type==='discovery'){let opts=state.discoveries.filter(d=>!d.found);if(opts.length===0)return applyMistReward('food',ring);let d=pick(opts);d.found=true;state.foundDiscoveries.push(d.id);return{type:'discovery',label:d.label,studyTime:d.studyTime}}if(type==='food'){let amts={shallows:[3,8],greyreach:[6,12],deep:[10,18]};let[mn,mx]=amts[ring.id]||[3,8];let amt=mn+rand(mx-mn+1);state.food+=amt;return{type:'food',amount:amt}}if(type==='survivor'){let name=pick(NAMES.survivors.filter(n=>!state.people.some(p=>p.name===n)));if(!name)return applyMistReward('food',ring);state.people.push({id:state.nextId++,name:name,role:'unassigned',assignment:'none',traits:{spirit:1+rand(3),body:1+rand(3),mind:1+rand(3)},exp:0,status:'active',completedTraining:[]});return{type:'survivor',name:name}}if(type==='weakness'){let opts=state.creatures.filter(c=>!state.knownWeaknesses.includes(c.id));if(opts.length===0)return applyMistReward('discovery',ring);let c=pick(opts);state.knownWeaknesses.push(c.id);return{type:'weakness',creature:c.label}}if(type==='artifact'){let opts=state.artifacts.filter(a=>!a.found);if(opts.length===0)return applyMistReward('discovery',ring);let a=pick(opts);a.found=true;state.foundArtifacts.push(a.id);return{type:'artifact',label:a.label}}return null}
+function launchMistExploration(mwId,depth){let mw=getPerson(mwId);if(!mw||mw.status!=='active'||mw.assignment!=='available'){addMessage('event','Mistwalker not available.');render();return}let range=getMistWalkerRange(mwId);let ringDef=CONFIG.mistRings.find(r=>r.id===depth);if(!ringDef||range<ringDef.minRange){addMessage('event',mw.name+'\'s range ('+range+') insufficient for '+ringDef.label+'.');render();return}mw.status='expedition';mw.assignment='mistExplore';state.maxDistanceTraveled=Math.max(state.maxDistanceTraveled,range);state.mistExplorations.push({mwId:mwId,mwName:mw.name,depth:depth,totalDays:range,daysOut:0});let depthLabel=ringDef.label;addMessage('expedition',flavorText(FLAVOR.depart,{name:mw.name})+' Mist exploration — heading for '+depthLabel+'. ~'+range+'d.',[],mc('person',mwId));state.attention+=CONFIG.expeditionAttention;render()}
+function processMistExplorations(){for(let i=state.mistExplorations.length-1;i>=0;i--){let exp=state.mistExplorations[i];exp.daysOut++;if(exp.daysOut===Math.floor(exp.totalDays/2))addMessage('expedition',flavorText(FLAVOR.midway,{name:exp.mwName,day:String(exp.daysOut)}),[],mc('tab','expeditions'));if(exp.daysOut>=exp.totalDays){resolveMistExploration(exp);state.mistExplorations.splice(i,1)}}}
+function resolveMistExploration(exp){let mw=getPerson(exp.mwId);if(!mw||mw.status==='dead')return;let findings=[];let injured=false;let injuryDays=0;let injuryRing=null;let daysCompleted=0;for(let d=1;d<=exp.totalDays;d++){let ring=getRingForDay(exp.depth,d);daysCompleted=d;if(chance(ring.encounterChance)){injured=true;injuryDays=ring.injuryMin+rand(ring.injuryMax-ring.injuryMin+1);let cr=getMistCreatureForRing(ring);injuryRing=ring;findings.push({type:'encounter',creature:cr.label,ring:ring.label});break}let rType=rollRingReward(ring);let result=applyMistReward(rType,ring);if(result)findings.push(result)}let expGain=Math.min(3,Math.ceil(daysCompleted/3));mw.exp=Math.min(10,mw.exp+expGain);if(injured){injure(mw,injuryDays,'encountered creatures in '+injuryRing.label)}else{mw.status='active';mw.assignment='available'}let depthLabel=CONFIG.mistRings.find(r=>r.id===exp.depth).label;addMessage('expedition',mw.name+' returned from '+daysCompleted+'d in the mist'+(exp.depth!=='shallows'?' (reached '+depthLabel+')':'')+'.',[],mc('person',mw.id));for(let f of findings){if(f.type==='encounter')addMessage('combat',mw.name+' encountered '+f.creature+' in '+f.ring+'. Forced to retreat.',[],mc('person',mw.id));else if(f.type==='location')addMessage('expedition','Spotted through the mist: '+f.label+' (distance '+f.distance+').',[],mc('tab','expeditions'));else if(f.type==='discovery')addMessage('expedition','Found: '+f.label+'. Needs '+f.studyTime+'d research.',[],mc('tab','research'));else if(f.type==='food')addMessage('expedition','Salvaged supplies: +'+f.amount+' food.',[],mc('tab','dashboard'));else if(f.type==='survivor'){let sp=state.people.find(p=>p.name===f.name);addMessage('event','Found survivor in the mist: '+f.name+'.',[],sp?mc('person',sp.id):mc('tab','people'))}else if(f.type==='weakness')addMessage('expedition','Observed '+f.creature+' behavior — weakness identified.',[],mc('tab','research'));else if(f.type==='artifact')addMessage('expedition','Recovered artifact: '+f.label+'.',[],mc('tab','research'))}let nonEncounter=findings.filter(f=>f.type!=='encounter');if(nonEncounter.length===0)addMessage('expedition',mw.name+' found nothing of note.',[],mc('person',mw.id))}
+
+function launchExpedition(locId){let loc=state.locations.find(l=>l.id===locId);if(!loc||!loc.revealed)return;let mw=alive().filter(p=>p.role==='mistwalker'&&p.assignment==='available');if(mw.length===0){addMessage('event','No mist walkers available.');render();return}showExpeditionModal(loc,mw)}
+
+function confirmExpeditionLaunch(locId,leaderId,priestId,escortIds){let loc=state.locations.find(l=>l.id===locId);let leader=getPerson(leaderId);let range=getMistWalkerRange(leaderId);if(range<loc.distance){addMessage('event',leader.name+'\'s range ('+range+') < distance ('+loc.distance+').');closeModal();render();return}if(escortIds.length>0&&!priestId){addMessage('event','Escort needs priest bubble.');closeModal();render();return}if(priestId&&escortIds.length>0){let pr=getPerson(priestId);let st=getPersonStats(pr);if(escortIds.length>(st.bubbleSize||2)){addMessage('event',pr.name+'\'s bubble ('+( st.bubbleSize||2)+') too small for '+escortIds.length+' escort.');closeModal();render();return}}leader.assignment='expedition';leader.status='expedition';let team=[leaderId];if(priestId){let pr=getPerson(priestId);pr.assignment='expedition';pr.status='expedition';team.push(priestId)}escortIds.forEach(id=>{let p=getPerson(id);p.assignment='expedition';p.status='expedition';team.push(id)});state.maxDistanceTraveled=Math.max(state.maxDistanceTraveled,loc.distance);let dur=loc.distance*2+rand(3);state.expeditions.push({locationId:loc.id,leaderName:leader.name,leaderId:leaderId,priestId:priestId||0,team:team,daysOut:0,duration:dur});state.attention+=CONFIG.expeditionAttention;addMessage('expedition',flavorText(FLAVOR.depart,{name:leader.name})+' Expedition to '+loc.label+'. ~'+dur+'d. Team: '+team.map(id=>personTag(getPerson(id))).join(', '),[],mc('tab','expeditions'));closeModal();render()}
+
+function endGame(reason){state.gameOver=true;document.getElementById('gameover-reason').textContent=reason;document.getElementById('gameover-stats').textContent='Survived '+state.day+'d. '+alive().length+' alive. '+state.studiedDiscoveries.length+' researched. '+state.exploredLocations.length+' explored.';document.getElementById('gameover').classList.add('open')}
+
+// RENDERING
+function render(){renderHeader();renderFeed();renderDashboard();renderPeople();renderExpeditions();renderResearch();renderEngineering();updateTabIndicators()}
+function updateTabIndicators(){let tabs=document.querySelectorAll('.tab');tabs.forEach(t=>t.classList.remove('has-action'));let ppl=alive().filter(p=>p.role==='unassigned').length>0;let res=state.discoveries.filter(d=>d.found&&!d.studied&&!state.activeResearch.some(r=>r.discoveryId===d.id)).length>0&&alive().some(p=>p.role==='scholar'&&(p.assignment==='available'||p.assignment==='none'));let eng=(!state.activeDig||!state.activeBuild)&&alive().some(p=>p.role==='engineer'&&(p.assignment==='available'||p.assignment==='none'))&&((!state.activeDig&&state.digLevels.some((l,i)=>!l.cleared&&(i===0||state.digLevels[i-1].cleared)))||(!state.activeBuild&&state.buildables.some(b=>!b.built&&state.studiedDiscoveries.includes(b.reqDiscovery))));let exp=alive().some(p=>p.role==='mistwalker'&&p.assignment==='available'&&p.status==='active');if(ppl){let t=document.querySelector('.tab[data-tab="people"]');if(t)t.classList.add('has-action')}if(res){let t=document.querySelector('.tab[data-tab="research"]');if(t)t.classList.add('has-action')}if(eng){let t=document.querySelector('.tab[data-tab="engineering"]');if(t)t.classList.add('has-action')}if(exp){let t=document.querySelector('.tab[data-tab="expeditions"]');if(t)t.classList.add('has-action')}}
+
+function renderHeader(){document.getElementById('header-day').textContent='Day '+state.day+' \u2014 '+VERSION;let fn=Math.round((getFoodProduction()-getFoodConsumption())*10)/10;let fc=state.food<20?'danger':state.food<50?'warning':'good';let ps=getPerimeterStability();let pc=ps<50?'danger':ps<100?'warning':'good';document.getElementById('header-stats').innerHTML='<div class="stat"><span class="stat-label">Pop:</span> <span class="stat-value">'+alive().length+'</span></div><div class="stat"><span class="stat-label">Food:</span> <span class="stat-value '+fc+'">'+Math.round(state.food)+'</span> <span class="stat-label">('+( fn>=0?'+':'')+fn+'/d)</span></div><div class="stat"><span class="stat-label">Perim:</span> <span class="stat-value '+pc+'">'+ps+'%</span></div><div class="stat"><span class="stat-label">Def:</span> <span class="stat-value">'+getDefenseStrength()+'</span></div><div class="stat"><span class="stat-label">Detect:</span> <span class="stat-value">'+getDetectionRange()+'d</span></div>'}
+
+function renderFeed(){let c=document.getElementById('feed-scroll');let msgs=[...state.messages].reverse();let html='';let cd=-1;for(let i=0;i<msgs.length;i++){let m=msgs[i];if(m.day!==cd){cd=m.day;html+='<div class="day-header">\u2014 Day '+cd+' \u2014</div>'}let ah='';if(m.actions&&m.actions.length>0)ah='<div class="msg-actions">'+m.actions.map(a=>'<button class="btn" onclick="'+a.action+'">'+a.label+'</button>').join('')+'</div>';let clk=m.clickAction?' clickable" onclick="handleFeedClick('+i+')':'';html+='<div class="message cat-'+m.category+clk+'"><div class="msg-category">'+m.category.toUpperCase()+'</div><div class="msg-text">'+m.text+(m.clickAction?' <span class="msg-goto">\u203a</span>':'')+'</div>'+ah+'</div>'}if(!html)html='<div class="empty-state">The monastery awaits.</div>';c.innerHTML=html}
+
+function renderDashboard(){let c=document.getElementById('view-dashboard');let db=getDefenseBreakdown();let fn=Math.round((getFoodProduction()-getFoodConsumption())*10)/10;let fc=state.food<20?'danger':state.food<50?'warning':'good';let ps=getPerimeterStability();let pc=ps<50?'danger':ps<100?'warning':'good';let pb=getPerimeterBreakdown();let pPriestCount=alive().filter(p=>p.assignment==='perimeter').length;let df=fn<0?Math.floor(state.food/Math.abs(fn)):'\u221e';
+let sysH='';if(state.builtSystems.length>0||state.activeBuild){sysH='<div class="section-title">Systems</div>';for(let bId of state.builtSystems){let b=state.buildables.find(x=>x.id===bId);sysH+='<div class="item-row"><span class="item-name">'+b.label+'</span><span class="status-good">'+b.effectLabel+'</span></div>'}if(state.activeBuild){let b=state.buildables.find(x=>x.id===state.activeBuild.buildableId);let pct=Math.round(state.activeBuild.progress/state.activeBuild.totalDays*100);sysH+='<div class="item-row"><span class="item-name">'+b.label+'</span><span class="status-warn">Building '+pct+'%</span></div>'}}
+let trH='';if(state.training.length>0){trH='<div class="section-title">Training</div>';for(let t of state.training){let p=getPerson(t.personId);let pct=Math.round((t.totalDays-t.daysRemaining)/t.totalDays*100);trH+='<div class="item-row"><span class="item-name">'+(p?p.name:'?')+' \u2192 '+roleLabel(t.targetRole)+'</span><span class="status-warn">'+t.daysRemaining+'d ('+pct+'%)</span></div>'}}
+let thH='';let app=state.threats.filter(t=>t.status==='approaching');if(app.length>0){thH='<div class="section-title" style="color:var(--danger-light)">Incoming Threats</div>';for(let t of app){let cr=state.creatures.find(c=>c.id===t.creatureId);let wk=cr&&state.knownWeaknesses.includes(cr.id);let countStr=t.scouted?t.count+' confirmed':'~'+t.count+' est.';let eAtk=cr?cr.attack*t.count:0;let eDef=cr?cr.defense*t.count:0;if(wk){eDef=Math.max(t.count,eDef-cr.weaknessBonus*t.count)}let timeStr='';if(t.scouted){let dl=t.actualArrivalDay-state.day;timeStr=dl<=1?'<strong style="color:var(--danger-light)">TOMORROW</strong>':'Day '+t.actualArrivalDay+' ('+dl+'d)'}else{let minD=Math.max(0,t.arrivalDayMin-state.day);let maxD=Math.max(0,t.arrivalDayMax-state.day);timeStr=minD<=1?'<strong style="color:var(--danger-light)">IMMINENT ('+minD+'-'+maxD+'d)</strong>':'Est. '+minD+'-'+maxD+'d'}let scoutBtn='';if(!t.scouted&&!t.scoutingMWId){let hasMW=alive().some(p=>p.role==='mistwalker'&&p.status==='active'&&p.assignment==='available');scoutBtn=hasMW?'<button class="btn" onclick="showScoutModal(\''+t.id+'\')" style="margin-left:8px">Scout</button>':'<span class="item-detail" style="margin-left:8px">(no MW to scout)</span>'}else if(t.scoutingMWId){let scMW=getPerson(t.scoutingMWId);scoutBtn='<span class="item-detail" style="margin-left:8px">Scouting... '+(scMW?scMW.name:'')+'</span>'}thH+='<div class="item-row"><div><span class="item-name">'+(cr?cr.label:'?')+' (Atk: '+(cr?cr.attack:'?')+', Def: '+(cr?cr.defense:'?')+') \u2014 '+countStr+' from '+t.direction+'</span><br><span class="item-detail">Total Atk: '+eAtk+' | Total Def: '+eDef+(wk?' (weakness known)':'')+'</span><br><span class="item-detail">Your Defense: '+getDefenseStrength()+' | '+timeStr+'</span></div><div style="text-align:right"><span class="status-bad">'+(t.scouted?'Day '+t.actualArrivalDay:'~Day '+t.arrivalDayMin+'-'+t.arrivalDayMax)+'</span>'+scoutBtn+'</div></div>'}}
+let foodWorkers=alive().filter(p=>p.assignment==='farms');let foodYB=getGlobalBuff('food');let foodTip=foodWorkers.map(p=>{if(p.role==='farmer'){let s=getPersonStats(p);return p.name+', Yield: '+((s.yield||3)+foodYB)}return p.name+', Yield: 2'}).join('\n');if(foodYB>0)foodTip+='\nGlobal Buff: +'+foodYB;foodTip+='\nConsumption: '+getFoodConsumption()+' ('+alive().length+' people)';let defTip=db.detail.map(d=>d.name+', Def: '+d.defense).join('\n');if(db.gap>0)defTip+='\n\nPerimeter gap: -'+db.gap+'% ('+db.rawTotal+' \u2192 '+db.total+')';let perimTip=pb.map(d=>d.name+', Contrib: '+d.contrib+'%').join('\n');if(ps<100){let gap=100-ps;perimTip+='\n\nGap: '+gap+'%';perimTip+='\nDefense reduced by '+gap+'%';perimTip+='\n'+Math.round(gap*10)/100+'% daily risk per exposed person';perimTip+='\n'+Math.round(gap*10)/100+'% daily food spoilage'}let detBase=3;let detDig=state.digLevels.filter(l=>l.cleared).length;let detTip='Base: '+detBase+' days';if(detDig>0)detTip+='\nDig levels: +'+detDig;let popTip='Mistwalkers: '+byRole('mistwalker').length+'\nPriests: '+byRole('priest').length+'\nFighters: '+byRole('fighter').length+'\nFarmers: '+byRole('farmer').length+'\nScholars: '+byRole('scholar').length+'\nEngineers: '+byRole('engineer').length+'\nUnassigned: '+byRole('unassigned').length;let injCount=alive().filter(p=>p.status==='injured').length;if(injCount>0)popTip+='\nInjured: '+injCount;let unexploredLocs=state.locations.filter(l=>l.revealed&&!l.explored);let exploredLocsList=state.locations.filter(l=>l.revealed&&l.explored);let expTip='Unexplored: '+unexploredLocs.length;for(let el of unexploredLocs)expTip+='\n  '+el.label;expTip+='\nExplored: '+exploredLocsList.length;for(let el of exploredLocsList)expTip+='\n  '+el.label;let knownLocs=state.locations.filter(l=>l.revealed).length;let unstudiedDiscs=state.discoveries.filter(d=>d.found&&!d.studied);let studiedDiscs=state.discoveries.filter(d=>d.studied);let resTip='Unstudied: '+unstudiedDiscs.length;for(let ud of unstudiedDiscs)resTip+='\n  '+ud.label;resTip+='\nStudied: '+studiedDiscs.length;for(let sd of studiedDiscs)resTip+='\n  '+sd.label;let researchedCount=state.studiedDiscoveries.length;let availResearch=state.discoveries.filter(d=>d.found&&!d.studied&&!state.activeResearch.some(r=>r.discoveryId===d.id)).length;let activeResearch=state.activeResearch.length;let levelsCleared=state.digLevels.filter(l=>l.cleared).length;let excTip='Levels cleared: '+levelsCleared;if(state.activeDig){let digLv=state.digLevels[state.activeDig.levelIndex];let digPpl=alive().filter(p=>p.assignment==='digging');let pctDig=Math.round(state.activeDig.progress/digLv.laborDays*100);excTip+='\n'+digLv.label+' in progress ('+pctDig+'%)';if(digPpl.length>0)excTip+='\n'+digPpl.map(p=>p.name).join(', ')}c.innerHTML='<div class="dashboard-grid"><div class="dash-card"><h3>Food</h3><div class="dash-value" data-tip="'+foodTip+'" style="color:var(--'+(fc==='good'?'success-light':fc==='warning'?'warning-light':'danger-light')+')">'+Math.round(state.food)+'</div><div class="dash-detail">'+getFoodProduction()+' prod / '+getFoodConsumption()+' cons ('+(fn>=0?'+':'')+fn+'/d)</div><div class="dash-detail">'+(fn<0?'~'+df+'d left':'Surplus')+'</div></div><div class="dash-card"><h3>Perimeter</h3><div class="dash-value" data-tip="'+perimTip+'" style="color:var(--'+(pc==='good'?'success-light':pc==='warning'?'warning-light':'danger-light')+')">'+ps+'%</div><div class="dash-detail">'+pPriestCount+' priests</div></div><div class="dash-card"><h3>Population</h3><div class="dash-value" data-tip="'+popTip+'">'+alive().length+'</div><div class="dash-detail">'+(injCount>0?'<span style="color:var(--danger-light)">'+injCount+' injured</span>':'All healthy')+'</div></div><div class="dash-card"><h3>Defense</h3><div class="dash-value" data-tip="'+defTip+'">'+db.total+'</div><div class="dash-detail">'+db.detail.length+' defenders</div></div></div><div class="dashboard-grid"><div class="dash-card"><h3>Exploration</h3><div class="dash-value" data-tip="'+expTip+'">'+unexploredLocs.length+'</div><div class="dash-detail">'+(unexploredLocs.length>0?unexploredLocs.length+' unexplored':'All explored')+' of '+knownLocs+' known</div></div><div class="dash-card"><h3>Research</h3><div class="dash-value" data-tip="'+resTip+'">'+researchedCount+'</div><div class="dash-detail">'+(availResearch>0?availResearch+' awaiting':'')+(activeResearch>0?(availResearch>0?' | ':'')+activeResearch+' in progress':'')+(availResearch===0&&activeResearch===0?'No discoveries to research':'')+'</div></div></div><div class="dashboard-grid"><div class="dash-card"><h3>Threat Detection</h3><div class="dash-value" data-tip="'+detTip+'">'+getDetectionRange()+' Days</div></div><div class="dash-card"><h3>Excavation</h3><div class="dash-value" data-tip="'+excTip+'">Level '+levelsCleared+'</div><div class="dash-detail">'+(state.activeDig?'Digging... '+alive().filter(p=>p.assignment==='digging').length+' engineer(s)':'Idle')+'</div></div></div>'+thH+sysH+trH}
+
+function renderPeople(){let c=document.getElementById('view-people');let gs=[{r:'priest',l:'Priests'},{r:'mistwalker',l:'Mistwalkers'},{r:'scholar',l:'Scholars'},{r:'engineer',l:'Engineers'},{r:'fighter',l:'Fighters'},{r:'farmer',l:'Farmers'},{r:'training',l:'Training'},{r:'unassigned',l:'Unassigned'}];let html='';for(let g of gs){let pp=alive().filter(p=>p.role===g.r);if(pp.length===0)continue;html+='<div class="role-group"><div class="role-header">'+g.l+' ('+pp.length+')</div>';for(let p of pp){let det=getAssignmentLabel(p);let st=getPersonStats(p);let ss=Object.entries(st).map(([k,v])=>k+':'+( typeof v==='number'?Math.round(v*10)/10:v)).join(' ');html+='<div class="item-row clickable" onclick="showPersonModal('+p.id+')"><div><span class="item-name">'+p.name+'</span> <span class="item-detail">'+det+'</span><br><span class="item-detail">'+ss+'</span></div><span class="item-status '+(p.status==='injured'||p.status==='lost'?'status-bad':p.status==='expedition'||p.status==='rescuing'?'status-expedition':p.status==='training'?'status-warn':'status-good')+'">'+p.status+(p.status==='injured'?' ('+p.injuryDays+'d)':p.status==='lost'?' ('+(state.day-p.lostDay)+'d)':'')+'</span></div>'}html+='</div>'}let dead=state.people.filter(p=>p.status==='dead');if(dead.length>0){html+='<div class="role-group"><div class="role-header">Fallen ('+dead.length+')</div>';for(let p of dead)html+='<div class="item-row" style="opacity:0.5"><span class="item-name">'+p.name+'</span><span class="status-bad">fallen</span></div>';html+='</div>'}c.innerHTML=html}
+
+function getAssignmentLabel(p){if(p.status==='injured')return'Injured \u2014 Recovery: '+( p.injuryDays||'?')+'d';if(p.assignment==='perimeter')return'Perimeter';if(p.assignment==='garrison')return'Garrison';if(p.assignment==='farms')return p.role==='farmer'?'Farms':'Farms (reduced)';if(p.assignment==='expedition')return'Expedition';if(p.assignment==='training'){let t=state.training.find(t=>t.personId===p.id);return t?'Training \u2192 '+roleLabel(t.targetRole)+' ('+t.daysRemaining+'d)':'Training'}if(p.assignment==='researching')return'Researching';if(p.assignment==='digging')return'Excavating';if(p.assignment==='building')return'Building';if(p.assignment==='scouting')return'Scouting threat';if(p.assignment==='recalling')return'Recalling expedition';if(p.assignment==='mistExplore'){let me=state.mistExplorations.find(e=>e.mwId===p.id);return me?'Exploring mist ('+me.daysOut+'/'+me.totalDays+'d)':'Exploring the mist'}if(p.assignment==='resting')return'Resting';if(p.assignment==='lost')return'Lost in the mist'+(p.lostDay?' ('+(state.day-p.lostDay)+'d)':'');if(p.assignment==='rescuing'){let tgt=getPerson(p.rescueTarget);return'Rescuing '+(tgt?tgt.name:'someone')}if(p.assignment==='available')return'Available';return'Idle'}
+
+function renderExpeditions(){let c=document.getElementById('view-expeditions');let availMW=alive().filter(p=>p.role==='mistwalker'&&p.assignment==='available');let expMW=alive().filter(p=>p.role==='mistwalker'&&p.status==='expedition');let totalMW=byRole('mistwalker').length;let injuredMW=alive().filter(p=>p.role==='mistwalker'&&p.status==='injured');let injStr='';if(injuredMW.length>0){let soonest=Math.min(...injuredMW.map(p=>p.injuryDays||99));injStr=' \u2014 '+injuredMW.length+' injured, next ready in '+soonest+'d'}let html='<div class="item-row" style="margin-bottom:12px;border-left:3px solid var(--expedition-light)"><span class="item-name">Mistwalkers: <span class="'+(availMW.length>0?'status-good':'status-bad')+'">'+availMW.length+' available</span></span><span class="item-detail">'+expMW.length+' on expedition / '+totalMW+' total'+injStr+'</span></div>';if(state.mistExplorations.length>0){html+='<div class="section-title">Mist Exploration — Active</div>';for(let me of state.mistExplorations){let depthLabel=CONFIG.mistRings.find(r=>r.id===me.depth).label;let pct=Math.round(me.daysOut/me.totalDays*100);html+='<div class="item-row"><div><span class="item-name">'+me.mwName+' \u2192 '+depthLabel+'</span><br><span class="item-detail">Day '+me.daysOut+'/'+me.totalDays+'</span></div><span class="status-expedition">Exploring ('+pct+'%)</span></div>'}}if(availMW.length>0){html+='<div class="section-title">Mist Exploration</div>';html+='<div class="item-detail" style="margin-bottom:8px;font-style:italic">Send a Mistwalker into the unknown. Deeper rings yield rarer finds but more danger.</div>';for(let mw of availMW){let r=getMistWalkerRange(mw.id);let btns='';for(let ring of CONFIG.mistRings){let canGo=r>=ring.minRange;btns+='<button class="btn" style="margin:2px;font-size:0.75rem" '+(canGo?'onclick="launchMistExploration('+mw.id+',\''+ring.id+'\')"':'disabled')+'>'+ring.label+(canGo?' ('+ring.encounterChance+'% risk)':' (need '+ring.minRange+')')+'</button>'}html+='<div class="item-row"><div><span class="item-name">'+mw.name+'</span><br><span class="item-detail">Range: '+r+' | Duration: '+r+'d</span></div><div style="text-align:right">'+btns+'</div></div>'}}if(state.expeditions.length>0){html+='<div class="section-title">Active Expeditions</div>';for(let ei=0;ei<state.expeditions.length;ei++){let e=state.expeditions[ei];let tm=e.team.map(id=>{let p=getPerson(id);return p?personTag(p):'?'}).join(', ');let loc=state.locations.find(l=>l.id===e.locationId);let statusStr='In progress';let recallBtn='';if(e.recalling){if(e.returnEndDay){statusStr='Returning (~'+(e.returnEndDay-state.day)+'d)'}else{statusStr='Recall sent'}}else{let hasMW=alive().some(p=>p.role==='mistwalker'&&p.status==='active'&&p.assignment==='available');recallBtn=hasMW?'<button class="btn" onclick="showRecallModal('+ei+')" style="margin-top:4px">Recall</button>':''}html+='<div class="item-row"><div><span class="item-name">'+e.leaderName+' \u2192 '+(loc?loc.label:'?')+'</span><br><span class="item-detail">Team: '+tm+'</span><br><span class="item-detail">Day '+e.daysOut+'/'+e.duration+'</span></div><div style="text-align:right"><span class="status-expedition">'+statusStr+'</span><br>'+recallBtn+'</div></div>'}}html+='<div class="section-title">Locations</div>';let rev=state.locations.filter(l=>l.revealed);if(rev.length===0)html+='<div class="empty-state">No locations known.</div>';else for(let loc of rev){let st=loc.explored?'explored':'available';let canR=alive().some(p=>p.role==='mistwalker'&&p.assignment==='available'&&p.status==='active'&&getMistWalkerRange(p.id)>=loc.distance);let enRoute=state.expeditions.some(e=>e.locationId===loc.id);html+='<div class="location-card '+st+'"><div style="display:flex;justify-content:space-between;align-items:start"><div><strong>'+loc.label+'</strong>'+(loc.explored?' \u2713':loc.scouted?' (scouted)':'')+'<br><span class="item-detail" style="font-style:italic">'+(loc.desc||'')+'</span><br><span class="item-detail">Dist: '+loc.distance+'</span>';if(loc.scouted||loc.explored){let crtsH=state.creatures.filter(c=>c.locationIds.includes(loc.id));let crStr=crtsH.map(c=>c.label+' (atk:'+c.attack+' def:'+c.defense+')').join(', ')||'None detected';let yStr=loc.yields.map(dId=>{let d=state.discoveries.find(x=>x.id===dId);return d?(d.found?d.label+' \u2713':d.label):'?'}).join(', ');html+='<br><span class="item-detail">Threats: '+crStr+'</span><br><span class="item-detail">Yields: '+(yStr||'?')+'</span>'}else{html+='<br><span class="item-detail" style="color:var(--text-secondary)">Unknown — a Mistwalker will assess on arrival.</span>'}html+='</div><div style="text-align:right">';if(loc.explored&&!loc.yields.some(dId=>!state.foundDiscoveries.includes(dId))){html+='<span class="status-good">Cleared</span>'}else if(enRoute){html+='<span class="status-expedition">En route</span>'}else{html+='<button class="btn" '+(canR?'onclick="launchExpedition(\''+loc.id+'\')"':'disabled')+'>'+(canR?'Explore':'Out of range')+'</button>'}html+='</div></div></div>'}let locked=state.locations.filter(l=>!l.revealed);if(locked.length>0)html+='<div class="empty-state">'+locked.length+' more locations. Research to reveal.</div>';c.innerHTML=html}
+
+function renderResearch(){let c=document.getElementById('view-research');let availSch=alive().filter(p=>p.role==='scholar'&&(p.assignment==='available'||p.assignment==='none'));let busySch=alive().filter(p=>p.role==='scholar'&&p.assignment==='researching');let totalSch=byRole('scholar').length;let html='<div class="item-row" style="margin-bottom:12px;border-left:3px solid var(--warning-light)"><span class="item-name">Scholars: <span class="'+(availSch.length>0?'status-good':'status-bad')+'">'+availSch.length+' available</span></span><span class="item-detail">'+busySch.length+' researching / '+totalSch+' total</span></div>';if(state.activeResearch.length>0){html+='<div class="section-title">Active Research</div>';for(let r of state.activeResearch){let d=state.discoveries.find(x=>x.id===r.discoveryId);let pct=Math.round(r.progress/d.studyTime*100);let sch=r.scholarIds.map(id=>{let p=getPerson(id);return p?p.name:'?'}).join(', ');let hasAvailSch=availSch.some(s=>!r.scholarIds.includes(s.id));html+='<div class="item-row"><div><span class="item-name">'+d.label+'</span><br><span class="item-detail">Scholars: '+sch+' | '+pct+'% ('+Math.round(r.progress)+'/'+d.studyTime+'d)</span><br><span class="item-detail">Unlocks: '+d.unlockLabel+'</span></div>'+(hasAvailSch?'<button class="btn" onclick="addScholarToResearch(\''+d.id+'\')">+ Scholar</button>':'')+'</div>'}}let avail=state.discoveries.filter(d=>d.found&&!d.studied&&!state.activeResearch.some(r=>r.discoveryId===d.id));if(avail.length>0){html+='<div class="section-title">Awaiting Research</div>';for(let d of avail)html+='<div class="item-row"><div><span class="item-name">'+d.label+'</span><br><span class="item-detail">'+d.studyTime+'d | Unlocks: '+d.unlockLabel+'</span></div><button class="btn" onclick="startResearch(\''+d.id+'\')">Research</button></div>'}if(state.activeResearch.length===0&&avail.length===0){html+='<div class="empty-state" style="margin:12px 0;opacity:0.6">No technologies available. Find discoveries through expeditions or digging.</div>'}let done=state.discoveries.filter(d=>d.studied);if(done.length>0){html+='<div class="section-title">Completed</div>';for(let d of done)html+='<div class="item-row" style="opacity:0.7"><span class="item-name">'+d.label+'</span><span class="status-good">'+d.unlockLabel+'</span></div>'}let fArts=state.artifacts.filter(a=>a.found);if(fArts.length>0){let availArts=fArts.filter(a=>!a.equippedTo);let equipArts=fArts.filter(a=>a.equippedTo);if(availArts.length>0){html+='<div class="section-title">Artifacts \u2014 Available</div>';for(let a of availArts){let fx=Object.entries(a.effects).map(([k,v])=>k+':+'+v).join(', ');html+='<div class="item-row"><div><span class="item-name">'+a.label+'</span><br><span class="item-detail">For: '+roleLabel(a.forRole)+' | '+fx+'</span></div><button class="btn" onclick="showEquipModal(\''+a.id+'\')">Equip</button></div>'}}if(equipArts.length>0){html+='<div class="section-title">Artifacts \u2014 Equipped</div>';for(let a of equipArts){let fx=Object.entries(a.effects).map(([k,v])=>k+':+'+v).join(', ');let own=getPerson(a.equippedTo);html+='<div class="item-row"><div><span class="item-name">'+a.label+'</span><br><span class="item-detail">For: '+roleLabel(a.forRole)+' | '+fx+'</span><br><span class="item-detail">Equipped: '+(own?own.name:'?')+'</span></div><button class="btn" onclick="unequipArtifact(\''+a.id+'\')">Unequip</button></div>'}}}if(!html)html='<div class="empty-state">Find discoveries through expeditions or digging.</div>';c.innerHTML=html}
+
+function renderEngineering(){let c=document.getElementById('view-engineering');let availEng=alive().filter(p=>p.role==='engineer'&&(p.assignment==='available'||p.assignment==='none'));let busyEng=alive().filter(p=>p.role==='engineer'&&(p.assignment==='digging'||p.assignment==='building'));let totalEng=byRole('engineer').length;let html='<div class="item-row" style="margin-bottom:12px;border-left:3px solid #7a6a5a"><span class="item-name">Engineers: <span class="'+(availEng.length>0?'status-good':'status-bad')+'">'+availEng.length+' available</span></span><span class="item-detail">'+busyEng.length+' busy / '+totalEng+' total</span></div>';
+// BUILD SECTION
+let canB=state.buildables.filter(b=>!b.built&&state.studiedDiscoveries.includes(b.reqDiscovery));if(canB.length>0||state.activeBuild){html+='<div class="section-title">Build</div>';if(state.activeBuild){let b=state.buildables.find(x=>x.id===state.activeBuild.buildableId);let pctB=Math.round(state.activeBuild.progress/state.activeBuild.totalDays*100);let engNames=(state.activeBuild.engineerIds||[]).map(id=>{let p=getPerson(id);return p?p.name:'?'}).join(', ');let hasAvailEngBuild=availEng.length>0;html+='<div class="item-row"><div><span class="item-name">'+b.label+'</span><br><span class="item-detail">Engineers: '+engNames+' | '+pctB+'% ('+Math.round(state.activeBuild.progress)+'/'+state.activeBuild.totalDays+'d)</span><br><span class="item-detail">Effect: '+b.effectLabel+'</span></div><div style="text-align:right"><span class="status-warn">Building</span>'+(hasAvailEngBuild?'<br><button class="btn" style="margin-top:4px" onclick="addEngineerToBuild()">+ Engineer (+30%)</button>':'')+'</div></div>'}for(let b of canB){if(state.activeBuild&&state.activeBuild.buildableId===b.id)continue;html+='<div class="item-row"><div><span class="item-name">'+b.label+'</span><br><span class="item-detail">'+b.buildTime+'d | '+b.effectLabel+'</span></div>'+(state.activeBuild?'<span class="item-detail">Queue</span>':'<button class="btn" onclick="startBuild(\''+b.id+'\')">Build</button>')+'</div>'}}
+// DIG SECTION
+html+='<div class="section-title">Excavation</div><p class="item-detail" style="margin-bottom:12px">Engineers dig beneath the monastery. Each level yields one significant discovery.</p>';for(let i=0;i<state.digLevels.length;i++){let lv=state.digLevels[i];let isNext=!lv.cleared&&(i===0||state.digLevels[i-1].cleared);let isAct=state.activeDig&&state.activeDig.levelIndex===i;let pct=isAct?Math.round(state.activeDig.progress/lv.laborDays*100):0;let yStr=lv.yields.map(dId=>{let d=state.discoveries.find(x=>x.id===dId);return d?(d.found?d.label+' \u2713':d.label):'?'}).join('');html+='<div class="item-row"><div><span class="item-name">'+lv.label+'</span><br><span class="item-detail">Labor: '+lv.laborDays+' eng-days | Discovery: '+(yStr||'?')+'</span>';if(isAct){let digPpl=alive().filter(p=>p.assignment==='digging');let digNames=digPpl.map(d=>d.name).join(', ');let totalSpd=0;digPpl.forEach(d=>{let s=getPersonStats(d);totalSpd+=(s.digSpeed||1)});let rem=lv.laborDays-state.activeDig.progress;let estRem=totalSpd>0?Math.ceil(rem/totalSpd):'?';html+='<br><span class="item-detail">'+digNames+' digging. '+pct+'% \u2014 ~'+estRem+'d remaining</span>'};html+='</div>';if(lv.cleared)html+='<span class="status-good">Cleared</span>';else if(isAct){let hasAvailEngDig=availEng.length>0;html+='<div style="text-align:right"><span class="status-warn">Digging</span>'+(hasAvailEngDig?'<br><button class="btn" style="margin-top:4px" onclick="addEngineerToDig()">+ Engineer (+30%)</button>':'')+'</div>'}else if(isNext)html+='<button class="btn" onclick="startDig()">Begin</button>';else html+='<span class="item-detail">Locked</span>';html+='</div>'}c.innerHTML=html}
+
+// MODALS
+function showPersonModal(pid){let p=getPerson(pid);if(!p)return;let st=getPersonStats(p);let sStr=Object.entries(st).map(([k,v])=>'<strong>'+k+':</strong> '+(typeof v==='number'?Math.round(v*10)/10:v)).join(' &nbsp; ');let tH=['spirit','body','mind'].map(t=>{let l={spirit:'Spirit',body:'Resilience',mind:'Acuity'}[t];let h={spirit:'Priest(3), MW(3)',body:'Fighter(2+), Eng(2+), MW(2+)',mind:'Scholar(3), Eng(2+)'}[t];return'<div class="trait-bar"><span class="trait-label">'+l+'</span><div class="trait-dots">'+[1,2,3].map(i=>'<div class="trait-dot '+(i<=p.traits[t]?'filled':'')+'"></div>').join('')+'</div><span class="trait-hint">'+h+'</span></div>'}).join('');let eq=(state.equippedArtifacts[p.id]||[]).map(aId=>{let a=state.artifacts.find(x=>x.id===aId);return a?a.label:'?'}).join(', ')||'None';let comp=p.completedTraining.map(r=>roleLabel(r)).join(', ')||'None';let aH='';if(p.status==='lost'){let daysLost=state.day-p.lostDay;let mws=alive().filter(m=>m.role==='mistwalker'&&m.status==='active'&&m.assignment==='available');aH+='<div class="reassign-section" style="color:var(--danger-light)"><strong>Lost in the mist</strong> \u2014 '+daysLost+' day(s). Will die if not rescued within '+(10-daysLost)+' days.</div>';if(mws.length>0){aH+='<div class="reassign-section"><h3>Rescue</h3><div class="modal-actions">';for(let mw of mws)aH+='<button class="btn" onclick="rescueLost('+mw.id+','+p.id+')">Send '+mw.name+' (1d)</button>';aH+='</div></div>'}else{aH+='<div class="reassign-section"><span class="item-detail" style="color:var(--danger-light)">No Mistwalker available to rescue.</span></div>'}}if(p.status==='injured'){aH+='<div class="reassign-section" style="color:var(--danger-light)"><strong>Injured</strong> \u2014 Recovering for '+(p.injuryDays||'?')+' more day(s). Will return to '+getDefaultAssignment(p.role)+' when healed.</div>'}if(p.status==='active'){aH+='<div class="reassign-section"><h3>Train</h3><div class="modal-actions">';let tr=['priest','fighter','scholar','engineer','farmer','mistwalker'].filter(r=>r!==p.role);for(let r of tr){let canTrain=meetsTraitReq(p,r);let reason='';if(r==='mistwalker'){if(!p.completedTraining.includes('fighter')||!p.completedTraining.includes('priest')){canTrain=false;reason=' (need F+P)'}else if(p.mwPermFail){canTrain=false;reason=' (failed)'}else if(!canTrain){reason=' ('+traitReqLabel(r)+')'}}else if(!canTrain){reason=' ('+traitReqLabel(r)+')'}let days=CONFIG.trainingDays[r]||7;let lb=roleLabel(r)+(canTrain?' ('+days+'d)':'')+reason;aH+='<button class="btn" '+(canTrain?'':'disabled')+' onclick="startTrainingAction('+p.id+',\''+r+'\')">'+lb+'</button>'}aH+='</div></div>';aH+='<div class="reassign-section"><h3>Assign</h3><div class="modal-actions">';if(p.assignment!=='farms')aH+='<button class="btn" onclick="reassignPerson('+p.id+',\'farms\')">Farms</button>';if(p.assignment!=='garrison')aH+='<button class="btn" onclick="reassignPerson('+p.id+',\'garrison\')">Garrison</button>';if(p.role==='priest'&&p.assignment!=='perimeter')aH+='<button class="btn" onclick="reassignPerson('+p.id+',\'perimeter\')">Perimeter</button>';if(p.assignment!=='available')aH+='<button class="btn" onclick="reassignPerson('+p.id+',\'available\')">Unassign</button>';if(state.activeDig&&p.role==='engineer'&&p.assignment!=='digging')aH+='<button class="btn" onclick="assignToDigging('+p.id+')">Dig</button>';if(state.activeBuild&&p.role==='engineer'&&p.assignment!=='building')aH+='<button class="btn" onclick="assignToBuilding('+p.id+')">Build</button>';aH+='</div></div>'}document.getElementById('modal-content').innerHTML='<h2>'+p.name+'</h2><p><strong>Role:</strong> '+roleLabel(p.role)+' | <strong>Exp:</strong> '+p.exp+' | <strong>Status:</strong> '+p.status+'</p><p><strong>Training:</strong> '+comp+'</p><div style="margin:10px 0">'+tH+'</div><p>'+sStr+'</p><p><strong>Artifacts:</strong> '+eq+'</p>'+aH+'<div class="modal-actions" style="margin-top:12px"><button class="btn" onclick="closeModal()">Close</button></div>';document.getElementById('modal').classList.add('open')}
+
+function showExpeditionModal(loc,mw){let priests=alive().filter(p=>p.role==='priest'&&p.assignment==='perimeter');let garrison=alive().filter(p=>p.assignment==='garrison');let wO=mw.map(w=>{let r=getMistWalkerRange(w.id);let ws=getPersonStats(w);return'<option value="'+w.id+'" '+(r>=loc.distance?'':'disabled')+'>'+w.name+' (end:'+r+', atk:'+(ws.attack||0)+', def:'+(ws.defense||0)+(r>=loc.distance?'':' - short')+')</option>'}).join('');let pO='<option value="0">None (solo)</option>'+priests.map(p=>{let s=getPersonStats(p);return'<option value="'+p.id+'">'+p.name+' (bubble:'+(s.bubbleSize||2)+', end:'+(s.endurance||0)+')</option>'}).join('');let eH=garrison.length>0?garrison.map(f=>{let s=getPersonStats(f);return'<label style="display:block;margin:3px 0;font-size:0.85rem;color:var(--text-secondary);cursor:pointer"><input type="checkbox" value="'+f.id+'" class="escort-cb" disabled style="margin-right:6px"> '+f.name+' ('+roleLabel(f.role)+', atk:'+(s.attack||0)+' def:'+(s.defense||0)+')</label>'}).join(''):'<span class="item-detail">No garrison available.</span>';document.getElementById('modal-content').innerHTML='<h2>Expedition: '+loc.label+'</h2><p>Dist:'+loc.distance+' Risk:'+loc.risk+'%. MW solo or with escort.</p><div class="select-group"><label>Leader (Mistwalker)</label><select id="exp-leader">'+wO+'</select></div><div class="select-group"><label>Priest (required for escort)</label><select id="exp-priest" onchange="toggleEscortCbs()">'+pO+'</select></div><div class="select-group"><label>Escort</label><div id="escort-section" style="opacity:0.4">'+eH+'</div><div id="escort-hint" class="item-detail" style="font-style:italic;margin-top:4px">Select a priest first to enable escort.</div></div><div class="modal-actions"><button class="btn btn-primary" onclick="submitExpeditionModal(\''+loc.id+'\')">Launch</button><button class="btn" onclick="closeModal()">Cancel</button></div>';document.getElementById('modal').classList.add('open')}
+
+function submitExpeditionModal(locId){let lid=parseInt(document.getElementById('exp-leader').value);let pid=parseInt(document.getElementById('exp-priest').value)||0;let eids=[...document.querySelectorAll('.escort-cb:checked')].map(cb=>parseInt(cb.value));confirmExpeditionLaunch(locId,lid,pid,eids)}
+
+function showEquipModal(aId){let a=state.artifacts.find(x=>x.id===aId);if(!a)return;let mwAllowed=['attack','defense','mistEndurance'];let cands=alive().filter(p=>{if(p.role===a.forRole)return true;if(p.role==='mistwalker')return Object.keys(a.effects).some(k=>mwAllowed.includes(k));return false});let fx=Object.entries(a.effects).map(([k,v])=>k+':+'+v).join(', ');let html='<h2>Equip '+a.label+'</h2><p>For: '+roleLabel(a.forRole)+' | '+fx+'</p>';if(cands.length===0)html+='<p>No eligible people.</p>';else{html+='<div class="section-title">Choose</div>';for(let p of cands){let st=getPersonStats(p);let sStr=Object.entries(st).map(([k,v])=>k+':'+( typeof v==='number'?Math.round(v*10)/10:v)).join(' ');let eq=(state.equippedArtifacts[p.id]||[]).map(eId=>{let ea=state.artifacts.find(x=>x.id===eId);return ea?ea.label:'?'}).join(', ')||'none';html+='<div class="item-row clickable" onclick="equipArtifact(\''+a.id+'\','+p.id+')"><div><span class="item-name">'+p.name+' ['+roleLabel(p.role)+']</span><br><span class="item-detail">'+sStr+'</span><br><span class="item-detail">Equipped: '+eq+'</span></div></div>'}}html+='<div class="modal-actions"><button class="btn" onclick="closeModal()">Cancel</button></div>';document.getElementById('modal-content').innerHTML=html;document.getElementById('modal').classList.add('open')}
+
+function toggleEscortCbs(){let v=parseInt(document.getElementById('exp-priest').value);let cbs=document.querySelectorAll('.escort-cb');let sec=document.getElementById('escort-section');let hint=document.getElementById('escort-hint');if(v>0){cbs.forEach(cb=>cb.disabled=false);if(sec)sec.style.opacity='1';if(hint)hint.style.display='none'}else{cbs.forEach(cb=>{cb.disabled=true;cb.checked=false});if(sec)sec.style.opacity='0.4';if(hint)hint.style.display='block'}}
+function closeModal(){document.getElementById('modal').classList.remove('open')}
+function switchTab(tab){document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));document.querySelector('.tab[data-tab="'+tab+'"]').classList.add('active');document.getElementById('view-'+tab).classList.add('active')}
+
+function startGame(){document.getElementById('intro').classList.add('fading');setTimeout(()=>{document.getElementById('intro').style.display='none'},1000);initState();addMessage('event','The monastery. '+alive().length+' souls. '+byRole('farmer').length+' farmers, '+byRole('fighter').length+' fighters, '+byRole('priest').length+' priests, '+byRole('scholar').length+' scholar, '+byRole('engineer').length+' engineer, '+byRole('mistwalker').length+' mist walker. '+alive().filter(p=>p.role==='unassigned').length+' unassigned.');addMessage('event','Perimeter: '+getPerimeterStability()+'%. Food: '+state.food+' ('+Math.round(getFoodProduction()-getFoodConsumption())+'/d).');addMessage('event',state.locations.filter(l=>l.revealed).length+' locations known. MW explores outward. Engineers dig and build. Scholars research discoveries.');addMessage('event','MW can go solo. Escort needs priest bubble. MW training requires Fighter + Priest first.');render()}
+
+document.getElementById('header-stats').innerHTML='';
+</script>
+</body>
+</html>
