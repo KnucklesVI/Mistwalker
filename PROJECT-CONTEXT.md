@@ -54,9 +54,14 @@ The game is procedurally generated — locations, creatures, discoveries, artifa
 
 ## Workflow Rules
 
+### Versioning Scheme
+- **Major updates** bump the minor number: 0.39 → 0.40, 0.40 → 0.41, etc.
+- **Flash updates** (small fixes, tweaks, single features) get letter suffixes: 0.39a, 0.39b, 0.39c, etc.
+- Yaro decides when something qualifies as a full version bump vs. a letter suffix.
+
 ### Version Snapshots
 - When creating a new version, **move the previous snapshot** from root to `MW Versions/`.
-- The current snapshot stays at root as `mistwalker-0.XX.html`.
+- The current snapshot stays at root as `mistwalker-0.XX.html` (or `mistwalker-0.XXa.html` for letter versions).
 - `index.html` is always a copy of the latest build (for GitHub Pages).
 - `Mistwalker (Current)/Mistwalker.html` is the working game file.
 
@@ -91,12 +96,14 @@ git push
 ```
 Note: Push uses a personal access token baked into the remote URL. If auth fails, Yaro may need to regenerate a token at https://github.com/settings/tokens.
 
+**Cannot push from sandbox** — the sandbox proxy blocks outbound git (403). Always give Yaro the commands to run locally.
+
 ---
 
 ## Technical Reference
 
 ### Current Version
-Alpha 0.39 (as of Feb 2026)
+Alpha 0.39a (as of Feb 2026)
 
 ### Roles (8)
 Worker, Fighter, Priest, Scholar, Engineer, Mistwalker, Mystic, Alchemist
@@ -109,6 +116,12 @@ Worker, Fighter, Priest, Scholar, Engineer, Mistwalker, Mystic, Alchemist
 - **Perimeter stability** scales defense. Gaps cause food spoilage, lost people, injuries.
 - **Clue system** reveals locations (3 clues each). 9 final clues unlock the Source.
 - **Lore types** use a `_loreType` tagging pattern: all discoveries start as buff/null for linkContent(), then convert to their desired type after linking.
+- **Stone resource** — quarried by workers, also a byproduct of excavation (0.3 × dig speed per day).
+- **Watchtowers** — built by engineers (8W + 6S), upgraded with metal (5M). Protect priests, enable mystics.
+- **Priests without towers** are 3x more vulnerable on perimeter. Priests in towers contribute to perimeter safely.
+- **Mystics require a reinforced tower** to contribute against spiritual threats. No tower = no spiritual boost.
+- **Towers degrade** 1 HP/day, take damage from physical attacks. If HP hits 0, occupants die.
+- **Tower damage scales** with combat result: decisive win → ⌈eAtk/20⌉, narrow → ⌈eAtk/10⌉, defeat → ⌈eAtk/5⌉.
 
 ### Key Functions to Know
 - `initState()` / `generateContent()` — game setup
@@ -120,6 +133,12 @@ Worker, Fighter, Priest, Scholar, Engineer, Mistwalker, Mystic, Alchemist
 - `showPersonModal()` — person UI (training, switching, assignments)
 - `playSound()` — Web Audio API sound effects (death = Pac-Man style)
 - `linkContent()` — connects discoveries to buildables/weaknesses/locations
+- `buildTower()` / `upgradeTower()` — tower construction and upgrade
+- `processTowerProject()` / `processTowerDegradation()` / `processTowerRepair()` — daily tower processing
+- `assignToTower()` / `removeTowerOccupant()` — tower occupant management
+- `getMysticInTower()` — checks if mystic is in reinforced tower (replaces getMysticInGarrison for spiritual boost)
+- `damageTowers()` / `destroyTower()` — tower damage and destruction
+- `getStoneRate()` / `processQuarrying()` — stone resource system
 
 ### Sound Types
 pop, alert, treasure, victory, defeat, injury, mist, death, arrival
@@ -155,4 +174,4 @@ pop, alert, treasure, victory, defeat, injury, mist, death, arrival
 
 ---
 
-*Last updated: Alpha 0.39 — February 11, 2026*
+*Last updated: Alpha 0.39a — February 11, 2026*

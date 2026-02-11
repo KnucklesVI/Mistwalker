@@ -1,5 +1,28 @@
 # Mistwalker Changelog
 
+## Alpha 0.39a
+*Watchtowers, stone quarrying, and priest/mystic defense overhaul.*
+
+**Systems**
+- New resource: Stone. Quarried by workers (new assignment) and produced as a byproduct of excavation.
+- Watchtower system: engineers build towers from wood and stone. Each tower protects one priest.
+- Towers can be upgraded with metal to allow a mystic to channel from within.
+- Mystics now require a reinforced tower to contribute against spiritual/ethereal threats. No tower, no spiritual defense.
+- Priests on perimeter without a tower are 3x more vulnerable to mist exposure (injury, loss, death).
+- Priests in towers contribute to perimeter stability while remaining protected.
+- Towers degrade 1 HP per day and take damage from physical attacks. If destroyed, occupants die.
+- Engineers can be assigned to repair towers, restoring HP over time.
+- Tower damage scales with combat outcome: minimal on decisive wins, heavy on defeats.
+
+**UI**
+- Stone displayed in header with production rate.
+- Watchtower section added to Engineering tab showing tower HP, occupants, build/upgrade/repair controls.
+- Quarry button added to worker assignment options.
+- Tower button added for priests and mystics in person modal.
+- Repair Towers button added for engineers.
+
+> Snapshot: mistwalker-0.39a.html
+
 ## Alpha 0.39
 *Combat rebalance — traps nerfed, late-game difficulty scaling.*
 
