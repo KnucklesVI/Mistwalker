@@ -1,5 +1,34 @@
 # Mistwalker Changelog
 
+## Alpha 0.39b
+*Alchemy tab, elixir equipping, and experimentation transparency.*
+
+**Systems**
+- New Alchemy tab centralizing all herb, recipe, brewing, and experimentation management.
+- Herb Garden section: shows known herbs with supply counts, assign/unassign workers directly from tab.
+- Recipes & Brewing section: view all known recipes, ingredient availability, and start brews with one click.
+- Alchemists no longer auto-pick recipes — player has full control over what to brew.
+- After finishing a brew, alchemist returns to available (no auto-repeat).
+- Brewed elixirs are now equippable to any person as a "potion slot" alongside artifacts.
+- Equipped elixirs provide stat buffs based on tier (attack, defense, endurance, yield, etc.).
+- Elixirs shown in person modal with equip/remove controls.
+- On death, equipped elixirs are automatically unequipped and returned to stockpile.
+
+**Experimentation**
+- Experimentation section now shows discovery chance per day (base 8% + insight bonus).
+- Shows experiment day count and current insight stat.
+- Displays how many recipes have been found through experimentation.
+- Start/stop experimenting directly from the Alchemy tab.
+
+**UI**
+- Alchemy tab indicator lights up when: new brew/recipe discovered, herbs available but no gardener, or brewable recipe available with idle alchemist.
+- Tab indicator clears when visiting the Alchemy tab.
+- Elixir Stockpile section shows available and equipped elixirs with equip/unequip controls.
+- Added "Quarrying stone" assignment label.
+
+**Tests**
+- 739 tests (17 new for alchemy system, consumable equipping, herb cultivation, death cleanup).
+
 ## Alpha 0.39a
 *Watchtowers, stone quarrying, and priest/mystic defense overhaul.*
 

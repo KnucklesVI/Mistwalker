@@ -103,7 +103,7 @@ Note: Push uses a personal access token baked into the remote URL. If auth fails
 ## Technical Reference
 
 ### Current Version
-Alpha 0.39a (as of Feb 2026)
+Alpha 0.39b (as of Feb 2026)
 
 ### Roles (8)
 Worker, Fighter, Priest, Scholar, Engineer, Mistwalker, Mystic, Alchemist
@@ -139,6 +139,11 @@ Worker, Fighter, Priest, Scholar, Engineer, Mistwalker, Mystic, Alchemist
 - `getMysticInTower()` — checks if mystic is in reinforced tower (replaces getMysticInGarrison for spiritual boost)
 - `damageTowers()` / `destroyTower()` — tower damage and destruction
 - `getStoneRate()` / `processQuarrying()` — stone resource system
+- `renderAlchemy()` — alchemy tab UI (herb garden, recipes, brewing, experimentation, stockpile)
+- `processHerbCultivation()` / `processAlchemy()` — daily herb harvesting and brewing/experimenting
+- `startDirectBrew()` — player-initiated brew of specific recipe
+- `equipConsumable()` / `unequipConsumable()` — elixir equip system (potion slot on people)
+- `showEquipConsumableModal()` — modal to pick who gets an elixir
 
 ### Sound Types
 pop, alert, treasure, victory, defeat, injury, mist, death, arrival
@@ -174,4 +179,4 @@ pop, alert, treasure, victory, defeat, injury, mist, death, arrival
 
 ---
 
-*Last updated: Alpha 0.39a — February 11, 2026*
+*Last updated: Alpha 0.39b — February 11, 2026*
