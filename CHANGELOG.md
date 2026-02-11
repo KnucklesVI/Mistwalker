@@ -21,6 +21,10 @@
 - Tower button added for priests and mystics in person modal.
 - Repair Towers button added for engineers.
 
+**Fixes**
+- Research tab indicator no longer lights up when scholars are busy researching. Only lights up when there are unseen discoveries/clues and a scholar is free, or when a scholar finishes research with more work waiting.
+- Research tab indicator clears when you visit the tab. Crafting scholars count as "free" for indicator purposes.
+
 > Snapshot: mistwalker-0.39a.html
 
 ## Alpha 0.39
