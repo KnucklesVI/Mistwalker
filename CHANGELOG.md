@@ -1,5 +1,20 @@
 # Mistwalker Changelog
 
+## Alpha 0.39
+*Combat rebalance — traps nerfed, late-game difficulty scaling.*
+
+**Systems**
+- Traps now only affect physical creatures. Corrupted and spiritual creatures pass right through them — you need real defenders for those.
+- Threat intensity scales with time and depth. Creature effective attack and defense increase by 15% per 30 days, multiplied by depth (1.2x at Grey Reach, 1.5x at Deep).
+- Threat pack sizes now scale with day count in addition to distance traveled, plus a bonus for depth entered.
+- Threat spawn interval tightens over time (starts at 8 days, decreases by 1 per 30 days, minimum 3 days).
+- Entering the Deep allows a 3rd simultaneous threat.
+
+**Fixes**
+- Late-game threats no longer plateau in difficulty — a Day 90 Deep attack is significantly harder than a Day 30 Shallows attack.
+
+> Snapshot: mistwalker-0.39.html
+
 ## Alpha 0.38
 *Role switching for cross-trained people.*
 
