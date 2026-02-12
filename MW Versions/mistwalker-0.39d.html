@@ -188,7 +188,6 @@ button:focus, select:focus, input:focus { outline: none; }
 <div class="intro-overlay" id="intro">
   <div class="intro-content">
     <h1>MISTWALKER</h1>
-    <p style="font-size:0.85rem;letter-spacing:2px;color:var(--accent);margin-bottom:16px" id="intro-version"></p>
     <p>The mist came. Your monastery survived. Protected by prayer, surrounded by farms, ringed by priests who hold back the fog.</p>
     <p>Sustain the monastery. Explore the mist. Discover what lies beyond.</p>
     <button class="btn btn-primary" onclick="startGame()" style="margin-top:20px; padding:10px 36px; font-size:0.95rem;">Begin</button>
@@ -240,7 +239,7 @@ button:focus, select:focus, input:focus { outline: none; }
   </div>
 </div>
 <script>
-const VERSION='Alpha 0.39e';
+const VERSION='Alpha 0.39d';
 const NAMES={
 locations:['The Sunken Chapel','Ashenveil Crossing','The Bone Orchard','Greymarch Bridge','Hollowspire','The Wailing Reach','Duskfield Ruins','Thornwall Keep','Misthollow Basin','The Pale Gate','Cindervault','Blackmere Depths','The Shattered Nave','Ironmoor Station','Rotstone Abbey','Gloomfen','The Veiled Stairs','Copperhead Ravine','Whispering Cairns','Old Mill Crossing','The Drowned Altar','Ashen Arbor','Frostbind Pass','The Hungering Dark','Lichen Crypt','Blight Hollow','Starfall Terrace','The Warden Ring','Salt Flat Sanctum','Mirewatch Tower','The Severed Path','Ghostmist Landing','Dreadfall Cleft','The Gilt Tomb','Ravenmoor','Blightwell','The Iron Parish','Coldvein Mine','Fogmantle Ridge','The Broken Loom','Embervault','Hushwood','The Obsidian Table','Rothelm Barracks','Gallowsreach','The Lost Reliquary','Mistfang Gorge','Penitent Hill','The Stoneblood Gate','Veilwatch Outpost'],
 creaturesPhysical:['Hollow Stalker','Ashmouth','Mistfang','Blighthound','Thornback','Bonepick','Shriek Bat','Duskwolf','Rootmaw','Mist Serpent','Scorch Drake','Blight Worm','Frostmaw','Deadwood Strider','Rot Wasp','Ash Bear','Cinder Wolf','Thorn Horror','Mist Drake','Nightcrawler'],
@@ -923,7 +922,6 @@ else if(e.key===' '){e.preventDefault();if(!feedStaggering)advanceDay()}
 function openFeedKb(){kbFeedOpen=true;kbFeedIdx=feedFilterIdx;let dd=document.getElementById('feed-dropdown');let html='';for(let i=0;i<feedFilterTypes.length;i++){let ft=feedFilterTypes[i];let label=ft==='all'?'All':ft.charAt(0).toUpperCase()+ft.slice(1);html+='<div id="kb-feed-'+i+'" onclick="feedFilterIdx='+i+';renderFeed();closeFeedKb()" style="padding:5px 14px;cursor:pointer;font-size:0.75rem;letter-spacing:1px;text-transform:uppercase;color:'+(feedFilterColors[ft]||'var(--text-muted)')+'">'+label+'</div>'}dd.innerHTML=html;dd.style.display='block';highlightFeedItem()}
 function closeFeedKb(){kbFeedOpen=false;let dd=document.getElementById('feed-dropdown');if(dd)dd.style.display='none'}
 function highlightFeedItem(){let dd=document.getElementById('feed-dropdown');if(!dd)return;for(let i=0;i<feedFilterTypes.length;i++){let el=document.getElementById('kb-feed-'+i);if(el)el.style.background=i===kbFeedIdx?'rgba(255,255,255,0.1)':'transparent'}}
-document.getElementById('intro-version').textContent=VERSION;
 </script>
 </body>
 </html>
