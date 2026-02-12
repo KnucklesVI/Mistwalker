@@ -81,7 +81,8 @@ body {
 .feed-scroll { flex: 1; overflow-y: auto; padding: 12px 16px; padding-bottom: 20px; }
 .right-panel { display: flex; flex-direction: column; overflow: hidden; }
 .tabs { display: flex; background: var(--bg-panel); border-bottom: 1px solid var(--border); padding: 0; flex-wrap: wrap; }
-.tab { position: relative; padding: 8px 14px; cursor: pointer; color: var(--text-muted); border: none; border-bottom: 2px solid transparent; transition: all 0.2s; font-family: Georgia, serif; font-size: 0.8rem; background: none; }
+.tab { position: relative; padding: 8px 14px; cursor: pointer; color: var(--text-muted); border: none; border-bottom: 2px solid transparent; transition: all 0.2s; font-family: Georgia, serif; font-size: 0.8rem; background: none; outline: none; }
+.tab:focus { outline: none; }
 .tab:hover { color: var(--text-secondary); }
 .tab.active { color: var(--accent); border-bottom-color: var(--accent); }
 .tab.has-action { position: relative; }
@@ -120,6 +121,8 @@ body {
 .message.clickable:hover .msg-goto { opacity: 0.7; }
 .garrison-badge { display:inline-block;font-size:0.65rem;font-weight:700;color:var(--danger-light);background:rgba(255,80,80,0.12);border:1px solid var(--danger-light);border-radius:3px;padding:0 4px;margin-left:6px;letter-spacing:0.5px;vertical-align:middle; }
 .msg-actions { margin-top: 8px; display: flex; gap: 6px; flex-wrap: wrap; }
+button, select, input { outline: none; }
+button:focus, select:focus, input:focus { outline: none; }
 .btn { background: var(--bg-input); border: 1px solid var(--border); color: var(--text-primary); padding: 5px 12px; font-family: Georgia, serif; font-size: 0.8rem; cursor: pointer; transition: all 0.15s; }
 .btn:hover { background: var(--bg-card-hover); border-color: var(--accent-dim); color: var(--accent); }
 .btn-primary { background: var(--accent-dim); color: var(--bg-deep); border-color: var(--accent-dim); }
@@ -216,13 +219,13 @@ body {
   </div>
   <div class="right-panel">
     <div class="tabs">
-      <button class="tab active" data-tab="dashboard" onclick="switchTab('dashboard')">Dashboard</button>
-      <button class="tab" data-tab="people" onclick="switchTab('people')">Units</button>
-      <button class="tab" data-tab="expeditions" onclick="switchTab('expeditions')">Mistwalker</button>
-      <button class="tab" data-tab="research" onclick="switchTab('research')">Scholar</button>
-      <button class="tab" data-tab="engineering" onclick="switchTab('engineering')">Engineer</button>
-      <button class="tab" data-tab="artifacts" onclick="switchTab('artifacts')">Artifacts</button>
-      <button class="tab" data-tab="alchemy" onclick="switchTab('alchemy')">Alchemy</button>
+      <button class="tab active" data-tab="dashboard" onclick="switchTab('dashboard')" tabindex="-1">Dashboard</button>
+      <button class="tab" data-tab="people" onclick="switchTab('people')" tabindex="-1">Units</button>
+      <button class="tab" data-tab="expeditions" onclick="switchTab('expeditions')" tabindex="-1">Mistwalker</button>
+      <button class="tab" data-tab="research" onclick="switchTab('research')" tabindex="-1">Scholar</button>
+      <button class="tab" data-tab="engineering" onclick="switchTab('engineering')" tabindex="-1">Engineer</button>
+      <button class="tab" data-tab="artifacts" onclick="switchTab('artifacts')" tabindex="-1">Artifacts</button>
+      <button class="tab" data-tab="alchemy" onclick="switchTab('alchemy')" tabindex="-1">Alchemy</button>
     </div>
     <div class="tab-content">
       <div class="view active" id="view-dashboard"></div>
@@ -901,6 +904,24 @@ function switchTab(tab){document.querySelectorAll('.tab').forEach(t=>t.classList
 function startGame(){document.getElementById('intro').classList.add('fading');setTimeout(()=>{document.getElementById('intro').style.display='none'},1000);initState();let autoTrain={'Maria':'priest','Cedric':'fighter','Felix':'engineer','Greta':'worker'};for(let[name,role]of Object.entries(autoTrain)){let p=state.people.find(x=>x.name===name&&x.role==='unassigned');if(p)startTrainingAction(p.id,role)}let ruth=state.people.find(x=>x.name==='Ruth');if(ruth)ruth.assignment='chopping';addMessage('event','The monastery. '+alive().length+' souls. '+byRole('worker').length+' workers, '+byRole('fighter').length+' fighters, '+byRole('priest').length+' priests, '+byRole('scholar').length+' scholar, '+byRole('engineer').length+' engineer, '+byRole('mistwalker').length+' mist walker. '+alive().filter(p=>p.role==='unassigned').length+' unassigned.');addMessage('event','Perimeter: '+getPerimeterStability()+'%. Food: '+state.food+' ('+Math.round(getFoodProduction()-getFoodConsumption())+'/d).');addMessage('event',state.locations.filter(l=>l.revealed).length+' locations known. MW explores outward. Workers farm, chop wood, and dig. Engineers build and salvage for metal. Scholars research.');addMessage('event','MW can go solo. Escort needs priest shield. MW training requires Fighter + Priest first.');render()}
 
 document.getElementById('header-stats').innerHTML='';
+let kbTabs=['dashboard','people','expeditions','research','engineering','artifacts','alchemy'];
+let kbFeedOpen=false;let kbFeedIdx=0;
+document.addEventListener('keydown',function(e){
+if(e.key==='Tab'){e.preventDefault();e.stopPropagation();if(state.gameOver)return;if(document.getElementById('modal').classList.contains('open'))return;let cur=kbTabs.indexOf(document.querySelector('.tab.active').dataset.tab);let next=(cur+1)%kbTabs.length;switchTab(kbTabs[next]);if(document.activeElement)document.activeElement.blur();return}
+if(document.getElementById('modal').classList.contains('open')){if(e.key==='Escape'){closeModal();e.preventDefault()}return}
+if(state.gameOver)return;
+if(kbFeedOpen){
+if(e.key==='ArrowDown'){e.preventDefault();kbFeedIdx=Math.min(feedFilterTypes.length-1,kbFeedIdx+1);highlightFeedItem()}
+else if(e.key==='ArrowUp'){e.preventDefault();kbFeedIdx=Math.max(0,kbFeedIdx-1);highlightFeedItem()}
+else if(e.key==='Enter'){e.preventDefault();feedFilterIdx=kbFeedIdx;renderFeed();closeFeedKb()}
+else if(e.key==='Escape'||e.key==='q'){e.preventDefault();closeFeedKb()}
+return}
+if(e.key==='q'){e.preventDefault();openFeedKb()}
+else if(e.key===' '){e.preventDefault();if(!feedStaggering)advanceDay()}
+},true);
+function openFeedKb(){kbFeedOpen=true;kbFeedIdx=feedFilterIdx;let dd=document.getElementById('feed-dropdown');let html='';for(let i=0;i<feedFilterTypes.length;i++){let ft=feedFilterTypes[i];let label=ft==='all'?'All':ft.charAt(0).toUpperCase()+ft.slice(1);html+='<div id="kb-feed-'+i+'" onclick="feedFilterIdx='+i+';renderFeed();closeFeedKb()" style="padding:5px 14px;cursor:pointer;font-size:0.75rem;letter-spacing:1px;text-transform:uppercase;color:'+(feedFilterColors[ft]||'var(--text-muted)')+'">'+label+'</div>'}dd.innerHTML=html;dd.style.display='block';highlightFeedItem()}
+function closeFeedKb(){kbFeedOpen=false;let dd=document.getElementById('feed-dropdown');if(dd)dd.style.display='none'}
+function highlightFeedItem(){let dd=document.getElementById('feed-dropdown');if(!dd)return;for(let i=0;i<feedFilterTypes.length;i++){let el=document.getElementById('kb-feed-'+i);if(el)el.style.background=i===kbFeedIdx?'rgba(255,255,255,0.1)':'transparent'}}
 </script>
 </body>
 </html>
