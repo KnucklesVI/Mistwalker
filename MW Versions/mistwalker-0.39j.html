@@ -132,7 +132,6 @@ button:focus, select:focus, input:focus { outline: none; }
 .kb-selected .item-name { color: var(--accent); }
 .kb-action-hl { box-shadow: 0 0 0 2px var(--accent) !important; background: var(--accent) !important; color: var(--bg-deep) !important; }
 .btn.kb-selected { background: rgba(201,169,110,0.28); box-shadow: 0 0 0 2px var(--accent); border-left: none; }
-select.kb-selected, input[type="checkbox"].kb-selected { box-shadow: 0 0 0 2px var(--accent); }
 .dashboard-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 16px; }
 .dash-card { background: var(--bg-card); border: 1px solid var(--border); padding: 12px; }
 .dash-card h3 { font-size: 0.7rem; letter-spacing: 1.5px; text-transform: uppercase; color: var(--text-muted); margin-bottom: 6px; }
@@ -245,7 +244,7 @@ select.kb-selected, input[type="checkbox"].kb-selected { box-shadow: 0 0 0 2px v
   </div>
 </div>
 <script>
-const VERSION='Alpha 0.39l';
+const VERSION='Alpha 0.39j';
 const NAMES={
 locations:['The Sunken Chapel','Ashenveil Crossing','The Bone Orchard','Greymarch Bridge','Hollowspire','The Wailing Reach','Duskfield Ruins','Thornwall Keep','Misthollow Basin','The Pale Gate','Cindervault','Blackmere Depths','The Shattered Nave','Ironmoor Station','Rotstone Abbey','Gloomfen','The Veiled Stairs','Copperhead Ravine','Whispering Cairns','Old Mill Crossing','The Drowned Altar','Ashen Arbor','Frostbind Pass','The Hungering Dark','Lichen Crypt','Blight Hollow','Starfall Terrace','The Warden Ring','Salt Flat Sanctum','Mirewatch Tower','The Severed Path','Ghostmist Landing','Dreadfall Cleft','The Gilt Tomb','Ravenmoor','Blightwell','The Iron Parish','Coldvein Mine','Fogmantle Ridge','The Broken Loom','Embervault','Hushwood','The Obsidian Table','Rothelm Barracks','Gallowsreach','The Lost Reliquary','Mistfang Gorge','Penitent Hill','The Stoneblood Gate','Veilwatch Outpost'],
 creaturesPhysical:['Hollow Stalker','Ashmouth','Mistfang','Blighthound','Thornback','Bonepick','Shriek Bat','Duskwolf','Rootmaw','Mist Serpent','Scorch Drake','Blight Worm','Frostmaw','Deadwood Strider','Rot Wasp','Ash Bear','Cinder Wolf','Thorn Horror','Mist Drake','Nightcrawler'],
@@ -921,16 +920,10 @@ function kbNavUp(){kbRefreshNavItems();if(kbNavRows.length===0)return;kbNavIdx=k
 function kbNavRight(){if(kbNavIdx<0||kbNavIdx>=kbNavRows.length)return;let acts=kbGetActions(kbNavRows[kbNavIdx]);if(acts.length<=1)return;kbActionIdx=kbActionIdx<0?0:Math.min(acts.length-1,kbActionIdx+1);kbHighlight()}
 function kbNavLeft(){if(kbNavIdx<0||kbNavIdx>=kbNavRows.length)return;let acts=kbGetActions(kbNavRows[kbNavIdx]);if(acts.length<=1)return;kbActionIdx=Math.max(0,kbActionIdx-1);kbHighlight()}
 function kbNavEnter(){if(kbNavIdx<0||kbNavIdx>=kbNavRows.length)return;let row=kbNavRows[kbNavIdx];let acts=kbGetActions(row);if(acts.length===0)return;let ti=kbActionIdx>=0&&kbActionIdx<acts.length?kbActionIdx:0;let tgt=acts[ti];if(tgt===row&&row.dataset.pid){kbNavModalOpen=true;showPersonModal(parseInt(row.dataset.pid))}else{tgt.click()}}
-function kbNavClose(){kbNavModalOpen=false;kbModalItems=[];kbModalIdx=-1;closeModal()}
-let kbModalItems=[];let kbModalIdx=-1;
-function kbRefreshModalItems(){try{let mc=document.getElementById('modal-content');if(!mc){kbModalItems=[];return}kbModalItems=Array.from(mc.querySelectorAll('.item-row.clickable,.btn:not(:disabled),select:not(:disabled),input[type="checkbox"]:not(:disabled)'));if(kbModalIdx>=kbModalItems.length)kbModalIdx=kbModalItems.length-1;kbHighlightModal()}catch(e){kbModalItems=[]}}
-function kbHighlightModal(){try{document.querySelectorAll('#modal-content .kb-selected').forEach(r=>r.classList.remove('kb-selected'));if(kbModalIdx>=0&&kbModalIdx<kbModalItems.length){let el=kbModalItems[kbModalIdx];el.classList.add('kb-selected');el.scrollIntoView({block:'nearest',behavior:'smooth'})}}catch(e){}}
-function kbModalDown(){kbRefreshModalItems();if(kbModalItems.length===0)return;kbModalIdx=kbModalIdx<0?0:Math.min(kbModalItems.length-1,kbModalIdx+1);kbHighlightModal()}
-function kbModalUp(){kbRefreshModalItems();if(kbModalItems.length===0)return;kbModalIdx=kbModalIdx<0?0:Math.max(0,kbModalIdx-1);kbHighlightModal()}
-function kbModalEnter(){if(kbModalIdx<0||kbModalIdx>=kbModalItems.length)return;let el=kbModalItems[kbModalIdx];if(el.tagName==='SELECT'){el.focus()}else if(el.tagName==='INPUT'&&el.type==='checkbox'){el.checked=!el.checked;el.dispatchEvent(new Event('change'))}else{el.click()}}
+function kbNavClose(){kbNavModalOpen=false;closeModal()}
 document.addEventListener('keydown',function(e){
-if(document.getElementById('modal').classList.contains('open')){if(e.key==='Escape'){e.preventDefault();kbNavClose();return}if(e.key==='Tab'){e.preventDefault();e.stopPropagation();if(e.shiftKey)kbModalUp();else kbModalDown();return}if(e.key==='Enter'){e.preventDefault();kbModalEnter();return}return}
-if(e.key==='Tab'){e.preventDefault();e.stopPropagation();if(state.gameOver)return;if(kbFeedOpen){closeFeedKb();return}let cur=kbTabs.indexOf(document.querySelector('.tab.active').dataset.tab);let dir=e.shiftKey?-1:1;let next=(cur+dir+kbTabs.length)%kbTabs.length;switchTab(kbTabs[next]);if(document.activeElement)document.activeElement.blur();return}
+if(e.key==='Tab'){e.preventDefault();e.stopPropagation();if(state.gameOver)return;if(document.getElementById('modal').classList.contains('open'))return;if(kbFeedOpen){closeFeedKb();return}let cur=kbTabs.indexOf(document.querySelector('.tab.active').dataset.tab);let next=(cur+1)%kbTabs.length;switchTab(kbTabs[next]);if(document.activeElement)document.activeElement.blur();return}
+if(document.getElementById('modal').classList.contains('open')){if(e.key==='Escape'){e.preventDefault();kbNavClose();return}if(kbNavModalOpen&&e.key==='ArrowDown'){e.preventDefault();kbNavDown();return}if(kbNavModalOpen&&e.key==='ArrowUp'){e.preventDefault();kbNavUp();return}return}
 if(state.gameOver)return;
 if(kbFeedOpen){if(e.key==='ArrowDown'){e.preventDefault();kbFeedIdx=Math.min(feedFilterTypes.length-1,kbFeedIdx+1);feedFilterIdx=kbFeedIdx;renderFeed();highlightFeedItem()}else if(e.key==='ArrowUp'){e.preventDefault();kbFeedIdx=Math.max(0,kbFeedIdx-1);feedFilterIdx=kbFeedIdx;renderFeed();highlightFeedItem()}else if(e.key==='q'){e.preventDefault();closeFeedKb()}else if(e.key==='Escape'){e.preventDefault();closeFeedKb()}return}
 if(e.key==='ArrowDown'){e.preventDefault();kbNavDown();return}
