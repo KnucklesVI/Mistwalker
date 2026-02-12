@@ -13,12 +13,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "Design Doc/Mistwalker - Content Bible.md",
+                "file": "Design Spec/04-exploration.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "Mistwalker - Content Bible"
+              "title": "04-exploration"
             }
           }
         ]
@@ -201,23 +201,41 @@
   },
   "active": "89c40b5445829f86",
   "lastOpenFiles": [
+    "mistwalker-0.50a.html.tmp.5.1770933006577",
+    "mistwalker-0.50a.html.tmp.5.1770932961436",
+    "mistwalker-0.50a.html.tmp.5.1770932955927",
+    "mistwalker-0.50a.html.tmp.5.1770932852847",
+    "mistwalker-0.50a.html.tmp.5.1770932534089",
+    "mistwalker-0.50a.html.tmp.5.1770932516294",
+    "mistwalker-0.50a.html",
+    "mistwalker-0.40a.html.zip",
+    "Design Spec/02-roles-and-progression.md",
+    "Design Spec/17-the-underground.md",
+    "Design Spec/PROCESS-JOURNAL.md",
+    "Design Spec/16-crafting-and-facilities.md",
+    "Design Spec/03-the-mist.md",
+    "Design Spec/04-exploration.md",
+    "Design Spec/BRIEFING-FOR-CONSULTATION.md",
+    "Design Spec/14-collaboration-roadmap.md",
+    "Design Spec/README.md",
+    "Design Spec/15-technical-architecture.md",
+    "Design Spec/01-the-organism.md",
+    "Design Spec/13-build-priority.md",
+    "Design Spec/12-a-day-in-the-life.md",
+    "Design Spec/11-open-questions.md",
+    "Design Spec/10-connections.md",
+    "Design Spec/09-forks-and-decisions.md",
+    "Design Spec/08-interface.md",
+    "Design Spec/07-pacing-and-tension.md",
+    "Design Spec/06-wonder-and-identity.md",
+    "Design Spec/05-knowledge-system.md",
+    "Design Spec/00-north-star.md",
+    "Design Doc/Mistwalker - Content Bible.md",
+    "Design Doc/Mistwalker - Design Document.md",
+    "Design Doc/the-last-light-design-doc.md",
+    "Design Spec",
     "mistwalker-0.40a.html",
     "MW Versions/mistwalker-0.40.html",
-    "mistwalker-0.40.html",
-    "MW Versions/mistwalker-0.39l.html",
-    "mistwalker-0.39l.html",
-    "MW Versions/mistwalker-0.39k.html",
-    "mistwalker-0.39k.html",
-    "MW Versions/mistwalker-0.39j.html",
-    "mistwalker-0.39j.html",
-    "MW Versions/mistwalker-0.39i.html",
-    "mistwalker-0.39i.html",
-    "PROJECT-CONTEXT.md",
-    "Design Doc/Mistwalker - Design Document.md",
-    "Design Doc/Mistwalker - Content Bible.md",
-    "CHANGELOG.md",
-    "CHANGELOG-RULES.md",
-    "the-last-light-design-doc.md",
-    "Welcome.md"
+    "PROJECT-CONTEXT.md"
   ]
 }
