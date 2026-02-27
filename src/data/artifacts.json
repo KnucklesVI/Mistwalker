@@ -1,0 +1,70 @@
+{
+  "artifacts": [
+    {
+      "id": "amulet_steadfast_mind",
+      "name": "Amulet of Steadfast Mind",
+      "description": "A carved stone amulet that glows faintly with internal light",
+      "statBonuses": {
+        "body": 0,
+        "mind": 2,
+        "spirit": 0
+      },
+      "special": "Wearer gains +1 to research speed"
+    },
+    {
+      "id": "bracers_defenders_grip",
+      "name": "Bracers of the Defender's Grip",
+      "description": "Worn leather bracers reinforced with ancient metal",
+      "statBonuses": {
+        "body": 2,
+        "mind": 0,
+        "spirit": 0
+      },
+      "special": "Wearer gains +20% defense when on garrison"
+    },
+    {
+      "id": "cloak_spirit_walker",
+      "name": "Cloak of the Spirit Walker",
+      "description": "A translucent garment that shimmers between colors",
+      "statBonuses": {
+        "body": 0,
+        "mind": 0,
+        "spirit": 2
+      },
+      "special": "Wearer sees hidden natures more clearly"
+    },
+    {
+      "id": "ring_perseverance",
+      "name": "Ring of Perseverance",
+      "description": "A simple band of unknown metal that never tarnishes",
+      "statBonuses": {
+        "body": 1,
+        "mind": 1,
+        "spirit": 0
+      },
+      "special": "Wearer recovers from injury 25% faster"
+    },
+    {
+      "id": "tome_forgotten_lore",
+      "name": "Tome of Forgotten Lore",
+      "description": "A leather-bound book filled with handwritten knowledge",
+      "statBonuses": {
+        "body": 0,
+        "mind": 3,
+        "spirit": 0
+      },
+      "special": "Can be studied to gain research insights"
+    },
+    {
+      "id": "pendant_mist_sense",
+      "name": "Pendant of Mist Sense",
+      "description": "A crystalline pendant that pulses with faint awareness",
+      "statBonuses": {
+        "body": 0,
+        "mind": 1,
+        "spirit": 2
+      },
+      "special": "Mistwalker wearing this discovers 30% more findings"
+    }
+  ]
+}

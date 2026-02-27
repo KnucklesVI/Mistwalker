@@ -1,0 +1,40 @@
+{
+  "creatures": [
+    {
+      "id": "mist_stalker",
+      "name": "Mist Stalker",
+      "strengthMin": 20,
+      "strengthMax": 35,
+      "description": "A shadowy predator from the shallow mist, moving with predatory grace",
+      "nature": "void",
+      "behavior": "aggressive"
+    },
+    {
+      "id": "bone_hound",
+      "name": "Bone Hound",
+      "strengthMin": 25,
+      "strengthMax": 40,
+      "description": "A skeletal creature bound together by sinew and malice, howling with otherworldly anguish",
+      "nature": "death",
+      "behavior": "pack_hunter"
+    },
+    {
+      "id": "whisper_swarm",
+      "name": "Whisper Swarm",
+      "strengthMin": 15,
+      "strengthMax": 30,
+      "description": "A cloud of incorporeal voices that sing of forgotten things and lost names",
+      "nature": "void",
+      "behavior": "evasive"
+    },
+    {
+      "id": "stone_warden",
+      "name": "Stone Warden",
+      "strengthMin": 30,
+      "strengthMax": 50,
+      "description": "A massive creature of animated stone and ancient earth, slow but implacable",
+      "nature": "earth",
+      "behavior": "defensive"
+    }
+  ]
+}

@@ -1,0 +1,133 @@
+{
+  "vital": [
+    {
+      "id": "altar_of_echoes",
+      "name": "Altar of Echoes",
+      "ring": 1,
+      "type": "vital",
+      "description": "An ancient stone altar where whispers of forgotten rituals echo endlessly",
+      "tiers": [
+        {
+          "name": "Approach",
+          "difficulty": 1,
+          "description": "The outer courtyard, overtaken by pale moss"
+        },
+        {
+          "name": "Chamber",
+          "difficulty": 2,
+          "description": "A circular chamber with carved symbols on the walls"
+        },
+        {
+          "name": "Heart",
+          "difficulty": 3,
+          "description": "The innermost sanctum where the altar rests"
+        }
+      ],
+      "rewards": {
+        "approach": "minor essence",
+        "chamber": "clue",
+        "heart": "artifact"
+      }
+    },
+    {
+      "id": "bone_garden",
+      "name": "Bone Garden",
+      "ring": 1,
+      "type": "vital",
+      "description": "A field where ancient bones rise from the earth in geometric patterns",
+      "tiers": [
+        {
+          "name": "Periphery",
+          "difficulty": 1,
+          "description": "The outer edge where bones first appear"
+        },
+        {
+          "name": "Grove",
+          "difficulty": 2,
+          "description": "Denser formations of bone and petrified wood"
+        },
+        {
+          "name": "Nexus",
+          "difficulty": 3,
+          "description": "The center where all patterns converge"
+        }
+      ],
+      "rewards": {
+        "periphery": "map fragment",
+        "grove": "herbs",
+        "nexus": "artifact"
+      }
+    },
+    {
+      "id": "mirror_pool",
+      "name": "Mirror Pool",
+      "ring": 1,
+      "type": "vital",
+      "description": "A perfectly still body of water that reflects things that aren't there",
+      "tiers": [
+        {
+          "name": "Shore",
+          "difficulty": 1,
+          "description": "The beach of pale sand leading to the water"
+        },
+        {
+          "name": "Shallows",
+          "difficulty": 2,
+          "description": "Where water and land blur together"
+        },
+        {
+          "name": "Depths",
+          "difficulty": 3,
+          "description": "The center of the pool where reflection breaks"
+        }
+      ],
+      "rewards": {
+        "shore": "lore",
+        "shallows": "nature hint",
+        "depths": "artifact"
+      }
+    }
+  ],
+  "minor": [
+    {
+      "id": "twisted_grove",
+      "name": "Twisted Grove",
+      "ring": 1,
+      "type": "minor",
+      "description": "A forest of gnarled trees growing in impossible spirals",
+      "rewards": ["herbs", "wood", "lore"]
+    },
+    {
+      "id": "stone_circle",
+      "name": "Stone Circle",
+      "ring": 1,
+      "type": "minor",
+      "description": "Ancient megaliths arranged in a perfect circle",
+      "rewards": ["map fragment", "stone", "clue"]
+    },
+    {
+      "id": "crystal_cave",
+      "name": "Crystal Cave",
+      "ring": 1,
+      "type": "minor",
+      "description": "A cavern filled with luminescent crystals",
+      "rewards": ["herbs", "artifact", "essence"]
+    },
+    {
+      "id": "rust_ravine",
+      "name": "Rust Ravine",
+      "ring": 1,
+      "type": "minor",
+      "description": "A deep gorge stained with oxide and ancient metal deposits",
+      "rewards": ["metal", "clue", "lore"]
+    },
+    {
+      "id": "listening_hill",
+      "name": "Listening Hill",
+      "ring": 1,
+      "type": "minor",
+      "description": "A rise where the wind carries voices from distant places",
+      "rewards": ["lore", "nature hint", "clue"]
+    }
+  ]
+}

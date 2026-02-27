@@ -13,12 +13,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "Design Spec/04-exploration.md",
+                "file": "Design Spec/PROCESS-JOURNAL.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "04-exploration"
+              "title": "PROCESS-JOURNAL"
             }
           }
         ]
@@ -31,10 +31,14 @@
             "id": "f780bc5457717778",
             "type": "leaf",
             "state": {
-              "type": "graph",
-              "state": {},
-              "icon": "lucide-git-fork",
-              "title": "Graph view"
+              "type": "markdown",
+              "state": {
+                "file": "latest update (Feb 26)/Mistwalker — System Architecture & Data Model.md",
+                "mode": "source",
+                "source": false
+              },
+              "icon": "lucide-file",
+              "title": "Mistwalker — System Architecture & Data Model"
             }
           }
         ]
@@ -199,43 +203,43 @@
       "bases:Create new base": false
     }
   },
-  "active": "89c40b5445829f86",
+  "active": "a64f0bc1bc80e1b0",
   "lastOpenFiles": [
-    "mistwalker-0.50a.html.tmp.5.1770933006577",
-    "mistwalker-0.50a.html.tmp.5.1770932961436",
-    "mistwalker-0.50a.html.tmp.5.1770932955927",
-    "mistwalker-0.50a.html.tmp.5.1770932852847",
-    "mistwalker-0.50a.html.tmp.5.1770932534089",
-    "mistwalker-0.50a.html.tmp.5.1770932516294",
-    "mistwalker-0.50a.html",
-    "mistwalker-0.40a.html.zip",
-    "Design Spec/02-roles-and-progression.md",
-    "Design Spec/17-the-underground.md",
     "Design Spec/PROCESS-JOURNAL.md",
-    "Design Spec/16-crafting-and-facilities.md",
-    "Design Spec/03-the-mist.md",
-    "Design Spec/04-exploration.md",
+    "latest update (Feb 26)/Mistwalker — Core Game Concept.md",
+    "latest update (Feb 26)/Mistwalker — System Architecture & Data Model.md",
+    "latest update (Feb 26)/Mistwalker — Core Game Concept.md",
+    "latest update (Feb 26)/Mistwalker — System Architecture & Mechanical Intent.md",
+    "latest update (Feb 26)/update 2",
+    "latest update (Feb 26)",
+    "src/core/sedR2UBFo",
+    "src/core/utils/targeting.js",
+    "src/core/utils",
+    "src/core/modules/breach.js",
+    "src/core/modules/pressure.js",
+    "TOWER_DEFENSE_INVENTORY copy.md",
+    "TOWER_DEFENSE_INVENTORY.md",
+    "ARCHITECTURE.md",
+    "docs/archive/CREATURE_SYSTEM_PROPOSAL.md",
+    "docs/archive/RING1_CHECKLIST.md",
+    "docs/archive/TEST_RESULTS.md",
+    "docs/archive/BUILD_VERIFICATION.txt",
+    "docs/archive/BUILD_MANIFEST.txt",
+    "docs/archive/SYSTEM_SUMMARY.md",
+    "docs/archive/STRUCTURE.md",
+    "docs/archive/QUICK_START.md",
+    "docs/archive/QUICK_REFERENCE.md",
+    "docs/archive/PROJECT-CONTEXT.md",
+    "docs/archive/MANIFEST.md",
+    "docs/archive/CORE_ENGINE_INDEX.md",
+    "docs/archive/CLAUDE-REFERENCE.md",
+    "docs/archive",
+    "IMPLEMENTATION_MAP.md",
+    "SESSION_GUIDE.md",
+    "SYSTEM_SUMMARY.md",
+    "SYSTEM_SPEC.md",
     "Design Spec/BRIEFING-FOR-CONSULTATION.md",
-    "Design Spec/14-collaboration-roadmap.md",
-    "Design Spec/README.md",
-    "Design Spec/15-technical-architecture.md",
-    "Design Spec/01-the-organism.md",
-    "Design Spec/13-build-priority.md",
-    "Design Spec/12-a-day-in-the-life.md",
-    "Design Spec/11-open-questions.md",
-    "Design Spec/10-connections.md",
-    "Design Spec/09-forks-and-decisions.md",
-    "Design Spec/08-interface.md",
-    "Design Spec/07-pacing-and-tension.md",
-    "Design Spec/06-wonder-and-identity.md",
-    "Design Spec/05-knowledge-system.md",
-    "Design Spec/00-north-star.md",
-    "Design Doc/Mistwalker - Content Bible.md",
-    "Design Doc/Mistwalker - Design Document.md",
-    "Design Doc/the-last-light-design-doc.md",
-    "Design Spec",
-    "mistwalker-0.40a.html",
-    "MW Versions/mistwalker-0.40.html",
-    "PROJECT-CONTEXT.md"
+    "CREATURE_SYSTEM_PROPOSAL.md",
+    "Design Spec/04-exploration.md"
   ]
 }
